@@ -14,7 +14,7 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/hyperformula.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/sql-wasm.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sql.js@1.11.0/dist/sql-wasm.js" defer></script>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js" defer></script>
   <script src="app.js" defer></script>
 </head>
@@ -54,14 +54,8 @@
               <button type="button" class="layer-button" data-layer="scientist">L2 Scientist</button>
               <button type="button" class="layer-button" data-layer="engineer">L3 Engineer</button>
             </div>
-            <div class="tool-switcher" role="group" aria-label="Choose a learning tool">
-              <button type="button" class="tool-button is-active" data-tool="sql">SQL</button>
-              <button type="button" class="tool-button" data-tool="excel">Excel</button>
-              <button type="button" class="tool-button" data-tool="python">Python</button>
-              <button type="button" class="tool-button" data-tool="powerbi">Power BI</button>
-            </div>
             <div class="dataset-manager">
-              <p class="eyebrow">DATASETS</p>
+              <p class="eyebrow">PRACTICE DATA</p>
               <div id="dataset-list" class="dataset-list"></div>
             </div>
             <div id="lesson-list" class="lesson-list"></div>
@@ -74,22 +68,31 @@
 
           <div class="lab-area">
             <div class="lab-toolbar">
-              <div class="active-course"><span id="tool-kicker">SQL FOUNDATIONS</span><strong id="active-lesson-title">Start with a query</strong></div>
+              <div class="active-course"><span id="tool-kicker">DATA ANALYST CERTIFICATION</span><strong id="active-lesson-title">Choose a challenge</strong></div>
               <div class="toolbar-actions">
                 <div class="dataset-meta"><span class="dataset-indicator"></span><span id="dataset-name">sample_sales.csv</span><span class="meta-divider"></span><span id="dataset-size">8 rows</span></div>
+                <div class="cert-progress" aria-label="Certification progress">
+                  <span id="certification-progress-label">0%</span>
+                  <progress id="certification-progress" max="100" value="0">0%</progress>
+                </div>
+                <span class="streak-pill">Streak <strong id="study-streak">0 days</strong></span>
                 <button id="save-project" class="mini-button" type="button">Save project</button>
                 <button id="export-csv" class="mini-button secondary" type="button">Export CSV</button>
-                <button id="project-gallery" class="mini-button secondary" type="button">Project gallery</button>
+                <button id="project-gallery" class="mini-button secondary" type="button">Certification Gallery</button>
                 <span class="impact-pill">Students helped <strong id="student-helped-count">0</strong></span>
               </div>
             </div>
             <div class="workspace-grid">
               <section class="work-panel source-panel" aria-labelledby="source-title">
                 <div class="panel-heading">
-                  <div><span class="panel-index">01</span><h2 id="source-title">Original file</h2></div>
-                  <button class="icon-button" id="reset-data" type="button" title="Restore sample data" aria-label="Restore sample data">↺</button>
+                  <div><span class="panel-index">01</span><h2 id="source-title">Instructions</h2></div>
+                  <span id="challenge-kind" class="challenge-kind">CHALLENGE</span>
                 </div>
-                <p class="panel-caption">Your active dataset, just as it arrived.</p>
+                <p class="panel-caption" id="instructions-caption">Choose a challenge to begin.</p>
+                <div id="challenge-instructions" class="challenge-instructions"></div>
+                <div class="example-block"><span>EXAMPLE</span><pre id="challenge-example"></pre></div>
+                <div id="hint-panel" class="hint-panel" hidden></div>
+                <div class="dataset-preview-heading"><strong>Active dataset</strong><button class="icon-button" id="reset-data" type="button" title="Restore sample data" aria-label="Restore sample data">↺</button></div>
                 <div class="table-scroll" id="source-table-wrap"><table class="data-table" id="source-table"></table></div>
                 <div class="source-footer"><span class="file-type" id="file-type">CSV</span><span id="column-count">0 columns</span></div>
               </section>
@@ -99,35 +102,21 @@
                   <div><span class="panel-index">02</span><h2 id="console-title">Command console</h2></div>
                   <span class="console-language" id="console-language">SQL</span>
                 </div>
-                <p class="panel-caption" id="console-caption">Write a query against your active data.</p>
-                <div id="sql-editor" class="editor-wrap">
-                  <div class="editor-label"><span class="editor-dot"></span>QUERY.SQl</div>
-                  <textarea id="sql-command" class="code-editor" spellcheck="false" aria-label="SQL query"></textarea>
-                </div>
-                <div id="excel-editor" class="editor-wrap is-hidden">
-                  <label class="editor-label" for="formula-input"><span class="editor-dot excel-dot"></span>FORMULA BAR <span class="formula-cell" id="selected-cell">A2</span></label>
-                  <div class="formula-row"><span class="formula-fx">fx</span><input id="formula-input" class="formula-input" aria-label="Excel formula" value="=SUM(E2:E9)"></div>
-                  <p class="helper-text">Select a cell in the grid, then try =SUM(E2:E9), =AVERAGE(E2:E9), =VLOOKUP(A2,A1:F9,3,FALSE), or =IF(E2&gt;500,"High","Standard").</p>
-                </div>
-                <div id="python-editor" class="editor-wrap is-hidden">
-                  <div class="editor-label"><span class="editor-dot python-dot"></span>NOTEBOOK CELL <span class="cell-count">In [1]</span></div>
-                  <textarea id="python-command" class="code-editor" spellcheck="false" aria-label="Python pandas command"></textarea>
-                </div>
-                <div id="powerbi-editor" class="editor-wrap is-hidden">
-                  <div class="editor-label"><span class="editor-dot bi-dot"></span>VISUAL BUILDER</div>
-                  <label class="field-label" for="chart-column">Measure</label>
-                  <select id="chart-column" class="select-input"></select>
-                  <label class="field-label" for="category-column">Group by</label>
-                  <select id="category-column" class="select-input"></select>
-                  <div class="chart-types" role="group" aria-label="Chart style">
-                    <button class="chart-type is-active" type="button" data-chart="bar">Bar</button>
-                    <button class="chart-type" type="button" data-chart="donut">Donut</button>
-                    <button class="chart-type" type="button" data-chart="table">Table</button>
+                <p class="panel-caption" id="console-caption">Edit the starter code, then run the checks.</p>
+                <div class="editor-wrap challenge-editor-wrap">
+                  <div class="editor-label"><span class="editor-dot"></span><span id="editor-language">SQL</span><span class="cell-count">EDITABLE</span></div>
+                  <div class="numbered-editor">
+                    <pre id="editor-line-numbers" aria-hidden="true">1</pre>
+                    <textarea id="challenge-code" class="code-editor" spellcheck="false" aria-label="Challenge code" autocapitalize="off" autocomplete="off"></textarea>
                   </div>
-                  <p class="helper-text">Choose a numeric measure and category to build an instant summary.</p>
                 </div>
-                <div class="console-actions"><button id="run-command" type="button" class="run-button"><span aria-hidden="true">▶</span> Run command <kbd>Ctrl ↵</kbd></button><span id="run-status" class="run-status" aria-live="polite">Ready</span></div>
-                <div class="quick-examples"><span>TRY</span><button type="button" data-example="basic">Basic</button><button type="button" data-example="filter">Filter</button><button type="button" data-example="group">Group</button></div>
+                <div class="console-actions challenge-actions">
+                  <button id="run-command" type="button" class="run-button"><span aria-hidden="true">▶</span> Run tests <kbd>Ctrl ↵</kbd></button>
+                  <button id="challenge-reset" type="button" class="mini-button secondary">Reset</button>
+                  <button id="show-hint" type="button" class="mini-button hint-button" hidden>Hint</button>
+                  <button id="show-solution" type="button" class="mini-button solution-button" hidden>Show solution</button>
+                  <span id="run-status" class="run-status" aria-live="polite">Ready</span>
+                </div>
               </section>
 
               <section class="work-panel result-panel" aria-labelledby="result-title">
@@ -141,6 +130,8 @@
                     <h3 id="summary-title">Lesson summary</h3>
                     <p id="summary-text">Your next data decision starts here.</p>
                   </div>
+                  <div class="tests-heading"><strong>Tests</strong><span id="test-summary">Not run</span></div>
+                  <ul id="test-list" class="test-list" aria-live="polite"></ul>
                   <div id="output-table" class="result-table"></div>
                   <canvas id="chart-canvas" width="320" height="180"></canvas>
                   <pre id="console-output" class="console-output">&gt; Ready to build your next insight.</pre>
@@ -213,7 +204,7 @@
         </div>
       </section>
     </main>
-    <footer class="site-footer"><span>SunnyStudy</span><span>Made for curious minds.</span><span>Everything stays on this device.</span></footer>
+    <footer class="site-footer"><span>SunnyStudy</span><span>Free for Students Forever</span><span>Everything stays on this device.</span></footer>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 

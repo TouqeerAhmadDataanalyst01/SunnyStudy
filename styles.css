@@ -62,6 +62,22 @@ h1, h2, p { margin-top: 0; }
 .dataset-list { display: grid; gap: 7px; }
 .mini-dataset { display: flex; justify-content: space-between; width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; background: rgba(255,255,255,0.02); color: var(--ink); text-align: left; cursor: pointer; font-size: 10px; }
 .mini-dataset span { color: var(--muted); }
+.course-group { border-top: 1px solid var(--line); }
+.course-group > summary { display: flex; justify-content: space-between; gap: 8px; padding: 10px 4px; color: var(--ink); cursor: pointer; font-size: 10px; font-weight: 600; }
+.course-group > summary small { flex: 0 0 auto; color: var(--muted); font-family: var(--mono); font-size: 8px; font-weight: 400; }
+.course-challenges { display: grid; gap: 2px; padding: 0 0 8px 5px; }
+.challenge-link { display: grid; grid-template-columns: 19px 1fr; align-items: start; gap: 6px; width: 100%; padding: 7px 5px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); text-align: left; font-size: 9px; line-height: 1.4; cursor: pointer; }
+.challenge-link:hover, .challenge-link.is-selected { background: rgba(124,224,172,0.1); color: var(--ink); }
+.challenge-link.is-passed { color: var(--green); }
+.challenge-status { display: grid; width: 16px; height: 16px; place-items: center; border: 1px solid var(--line); border-radius: 50%; font-size: 9px; }
+.challenge-link.is-passed .challenge-status { border-color: var(--green); background: var(--green); color: #10251a; }
+.cert-progress { display: grid; grid-template-columns: auto minmax(70px, 100px); align-items: center; gap: 7px; color: var(--green); font-family: var(--mono); font-size: 9px; }
+.cert-progress progress { width: 100%; height: 7px; overflow: hidden; border: 0; border-radius: 99px; appearance: none; background: rgba(255,255,255,0.08); }
+.cert-progress progress::-webkit-progress-bar { border-radius: 99px; background: rgba(255,255,255,0.08); }
+.cert-progress progress::-webkit-progress-value { border-radius: 99px; background: var(--green); transition: width .25s ease; }
+.cert-progress progress::-moz-progress-bar { border-radius: 99px; background: var(--green); }
+.streak-pill { padding: 5px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-family: var(--mono); font-size: 9px; }
+.streak-pill strong { color: var(--sun); font-weight: 500; }
 .impact-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 999px; background: rgba(124,224,172,0.08); color: var(--muted); font-family: var(--mono); font-size: 9px; }
 .impact-pill strong { color: var(--green); }
 .lesson-list { display: grid; gap: 3px; margin-top: 15px; }
@@ -110,6 +126,40 @@ h1, h2, p { margin-top: 0; }
 .file-type { padding: 3px 6px; border-radius: 3px; background: var(--sun-light); color: #77610b; font-size: 8px; }
 .console-language { color: var(--green); font-family: var(--mono); font-size: 9px; }
 .editor-wrap { min-height: 200px; padding: 10px; border: 1px solid #e8ebe3; border-radius: 4px; background: #f8f9f5; }
+.challenge-editor-wrap { min-height: 300px; }
+.challenge-kind { padding: 4px 6px; border-radius: 3px; background: var(--green-pale); color: var(--green); font-family: var(--mono); font-size: 8px; }
+.challenge-kind.is-project { background: var(--sun-light); color: var(--sun); }
+.challenge-instructions { min-height: 75px; color: var(--ink); font-size: 11px; line-height: 1.65; }
+.challenge-instructions p { margin: 0 0 9px; }
+.challenge-instructions h3, .challenge-instructions h4 { margin: 8px 0; font-family: var(--display); font-size: 13px; }
+.challenge-instructions code, .example-block pre, .hint-panel { font-family: var(--mono); }
+.challenge-instructions code { padding: 2px 4px; border-radius: 3px; background: rgba(255,255,255,0.08); color: var(--green); }
+.instruction-bullet { padding-left: 12px; position: relative; }
+.instruction-bullet::before { position: absolute; left: 0; color: var(--green); content: "•"; }
+.example-block { margin: 10px 0; padding: 9px; border: 1px solid var(--line); border-radius: 5px; background: rgba(255,255,255,0.025); }
+.example-block > span { color: var(--muted); font-family: var(--mono); font-size: 8px; }
+.example-block pre { margin: 7px 0 0; overflow-wrap: anywhere; color: var(--green); font-size: 9px; line-height: 1.6; white-space: pre-wrap; }
+.hint-panel { margin: 10px 0; padding: 10px; border: 1px solid rgba(255,202,77,0.35); border-radius: 5px; background: rgba(255,202,77,0.1); color: #ffe29a; font-size: 9px; line-height: 1.6; white-space: pre-wrap; }
+.hint-panel[hidden] { display: none; }
+.dataset-preview-heading { display: flex; justify-content: space-between; align-items: center; margin: 12px 0 7px; color: var(--muted); font-size: 9px; }
+.dataset-preview-heading .icon-button { width: 23px; height: 23px; }
+.numbered-editor { display: grid; grid-template-columns: 26px minmax(0, 1fr); min-height: 235px; max-height: 420px; overflow: hidden; border-radius: 3px; background: #101923; }
+.numbered-editor > pre { max-height: 100%; margin: 0; padding: 12px 6px; overflow: hidden; border-right: 1px solid rgba(255,255,255,0.08); color: #6d8076; font-family: var(--mono); font-size: 10px; line-height: 1.8; text-align: right; white-space: pre; }
+.numbered-editor .code-editor { min-height: 235px; max-height: 420px; overflow: auto; padding: 12px 10px; resize: vertical; background: #101923; color: #d8eee2; caret-color: var(--sun); font-size: 10px; line-height: 1.8; white-space: pre; }
+.challenge-actions { flex-wrap: wrap; }
+.hint-button { border-color: rgba(255,202,77,0.35); color: var(--sun); }
+.solution-button { border-color: rgba(255,143,113,0.35); color: var(--coral); }
+.test-list { display: grid; gap: 6px; margin: 8px 0 13px; padding: 0; list-style: none; }
+.tests-heading { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--ink); font-size: 10px; }
+.tests-heading span { color: var(--muted); font-family: var(--mono); font-size: 8px; }
+.test-result { display: flex; align-items: start; gap: 7px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+.test-result > span:first-child { flex: 0 0 auto; display: grid; width: 16px; height: 16px; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.08); font-family: var(--mono); }
+.test-result.is-passed { color: var(--green); }
+.test-result.is-passed > span:first-child { background: rgba(124,224,172,0.16); }
+.test-result.is-failed { color: #ff9a88; }
+.test-result.is-failed > span:first-child { background: rgba(255,143,113,0.16); }
+.run-status.success { color: var(--green); }
+.run-button:disabled { opacity: .6; cursor: wait; }
 .editor-wrap.is-hidden { display: none; }
 .editor-label { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; color: #7b837a; font-family: var(--mono); font-size: 8px; letter-spacing: .5px; }
 .editor-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
@@ -317,6 +367,11 @@ kbd { margin-left: 3px; padding: 3px 4px; border-radius: 2px; background: #fffff
   .lesson-copy strong { font-size: 10px; }
   .syllabus-note { display: none; }
   .lab-toolbar { min-height: 48px; margin-bottom: 7px; }
+  .toolbar-actions { justify-content: flex-start; }
+  .cert-progress { grid-template-columns: auto minmax(65px, 1fr); }
+  .course-challenges { grid-template-columns: 1fr; }
+  .challenge-editor-wrap { min-height: 0; }
+  .numbered-editor, .numbered-editor .code-editor { min-height: 215px; }
   .active-course strong { font-size: 14px; }
   .dataset-meta { font-size: 8px; }
   .workspace-grid { grid-template-columns: 1fr; gap: 10px; }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sunnystudy-v1';
+const CACHE_NAME = 'sunnystudy-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -28,9 +28,10 @@ self.addEventListener('fetch', (event) => {
       if (cached) return cached;
       return fetch(event.request)
         .then((response) => {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
-          return response;
+          if (!response.ok) return response;
+          return caches.open(CACHE_NAME)
+            .then((cache) => cache.put(event.request, response.clone()).catch(() => undefined))
+            .then(() => response);
         })
         .catch(() => caches.match('./index.html'));
     })

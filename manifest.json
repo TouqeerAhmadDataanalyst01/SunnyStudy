@@ -2,7 +2,7 @@
   "name": "SunnyStudy - Free University for Students",
   "short_name": "SunnyStudy",
   "description": "Static data learning lab for students with analytics, science, and engineering workflows.",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b1220",
   "theme_color": "#0b1220",

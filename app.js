@@ -523,8 +523,8 @@ function cacheDom() {
   elements.lessonList = document.getElementById('lesson-list');
   elements.lessonCount = document.getElementById('lesson-count');
   elements.sourceTable = document.getElementById('source-table');
-  elements.consoleInput = document.getElementById('sql-command') || document.getElementById('console-input') || document.getElementById('formula-input') || document.getElementById('python-command');
-  elements.consoleRun = document.getElementById('run-command') || document.getElementById('console-run');
+  elements.consoleInput = document.getElementById('challenge-code');
+  elements.consoleRun = document.getElementById('run-command');
   elements.consoleOutput = document.getElementById('console-output');
   elements.outputChart = document.getElementById('chart-canvas');
   elements.summaryTitle = document.getElementById('summary-title') || document.getElementById('active-lesson-title');
@@ -605,27 +605,7 @@ function renderToolButtons() {
 }
 
 function syncEditorPanels() {
-  const editorMap = {
-    sql: document.getElementById('sql-editor'),
-    excel: document.getElementById('excel-editor'),
-    python: document.getElementById('python-editor'),
-    powerbi: document.getElementById('powerbi-editor')
-  };
-
-  Object.entries(editorMap).forEach(([tool, panel]) => {
-    if (!panel) return;
-    const visible = tool === state.tool;
-    panel.classList.toggle('is-hidden', !visible);
-  });
-
-  const activeInputMap = {
-    sql: document.getElementById('sql-command'),
-    excel: document.getElementById('formula-input'),
-    python: document.getElementById('python-command'),
-    powerbi: document.getElementById('chart-column')
-  };
-
-  elements.consoleInput = activeInputMap[state.tool] || document.getElementById('sql-command');
+  elements.consoleInput = document.getElementById('challenge-code');
   const activeLang = document.getElementById('console-language');
   const caption = document.getElementById('console-caption');
   if (activeLang) activeLang.textContent = TOOL_LABELS[state.tool].toUpperCase();
@@ -1044,6 +1024,8 @@ const lessonsMap = {
   python_fullstack: { title: 'Full Stack Python Certification', courses: [] }
 };
 
+globalThis.lessonsMap = lessonsMap;
+
 function init() {
   cacheDom();
   elements.challengeCode = document.getElementById('challenge-code');
@@ -1095,6 +1077,8 @@ function init() {
 }
 
 function bindChallengeEvents() {
+  bindPageNavigation();
+
   elements.layerButtons.forEach((button) => {
     button.addEventListener('click', () => {
       state.layer = button.dataset.layer;
@@ -1344,7 +1328,10 @@ async function executeFormula(code) {
   if (!state.activeData.length) throw new Error('The active dataset is empty.');
   const columns = Object.keys(state.activeData[0]);
   const matrix = [columns, ...state.activeData.map((row) => columns.map((column) => row[column] ?? null))];
-  const engine = window.HyperFormula.buildFromArray([...matrix, [code]], { licenseKey: 'gpl-v3' });
+  const formula = state.importedData
+    ? code.replace(/([A-Z]+)(\d+):([A-Z]+)\d+/gi, `$1$2:$3${state.activeData.length + 1}`)
+    : code;
+  const engine = window.HyperFormula.buildFromArray([...matrix, [formula]], { licenseKey: 'gpl-v3' });
   try {
     const address = { sheet: 0, row: matrix.length, col: 0 };
     const value = engine.getCellValue(address);
@@ -1361,9 +1348,10 @@ async function executePython(code, challenge) {
     state.pyodide = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/' });
   }
   state.pyodide.globals.set('sunnystudy_json', JSON.stringify(state.activeData));
-  await state.pyodide.runPythonAsync(`import json\nrows = json.loads(sunnystudy_json)\n${code}`);
-  const variables = {};
   const names = [...new Set(challenge.tests.map((test) => test.variable).filter(Boolean))];
+  const resetNames = names.map((name) => `globals().pop(${JSON.stringify(name)}, None)`).join('\n');
+  await state.pyodide.runPythonAsync(`import json\nrows = json.loads(sunnystudy_json)\n${resetNames}\n${code}`);
+  const variables = {};
   for (const name of names) {
     const proxy = state.pyodide.globals.get(name);
     if (proxy === undefined) continue;
@@ -1640,6 +1628,36 @@ function importDatasetFile(event) {
     }
     event.target.value = '';
   };
+
+  function bindPageNavigation() {
+    document.querySelectorAll('.nav-link[data-page]').forEach((button) => {
+      button.addEventListener('click', () => navigateToPage(button.dataset.page));
+    });
+
+    window.addEventListener('hashchange', () => {
+      navigateToPage(window.location.hash === '#assignment-page' ? 'assignment' : 'learn', false);
+    });
+
+    navigateToPage(window.location?.hash === '#assignment-page' ? 'assignment' : 'learn', false);
+  }
+
+  function navigateToPage(page, updateHash = true) {
+    const assignmentVisible = page === 'assignment';
+    const learnPage = document.getElementById('learn-page');
+    const assignmentPage = document.getElementById('assignment-page');
+    if (!learnPage || !assignmentPage) return;
+
+    learnPage.hidden = assignmentVisible;
+    assignmentPage.hidden = !assignmentVisible;
+    learnPage.classList.toggle('is-visible', !assignmentVisible);
+    assignmentPage.classList.toggle('is-visible', assignmentVisible);
+    document.querySelectorAll('.nav-link[data-page]').forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.page === (assignmentVisible ? 'assignment' : 'learn'));
+    });
+
+    const nextHash = assignmentVisible ? '#assignment-page' : '#learn-page';
+    if (updateHash && window.location && window.location.hash !== nextHash) window.location.hash = nextHash;
+  }
   reader.onerror = () => showToast('The selected file could not be read.');
   reader.readAsText(file);
 }

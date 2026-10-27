@@ -27,7 +27,7 @@ SunnyStudy is a small, free data-learning workshop that runs in a web browser. I
 
 The project is intentionally static. Its core is made from ordinary web files rather than a server application. That keeps the project easy to host and inspect, and means there is no SunnyStudy account or paid service required to open the local app.
 
-SunnyStudy is also a work in progress. Some parts of the interface are prototypes, and some lessons demonstrate what a tool might do instead of running that tool's full runtime. This book explains the current behavior plainly so learners can explore with the right expectations.
+SunnyStudy is also a work in progress. Its 120 challenges use browser runtimes and test callbacks, but the curriculum is still relatively small and the assignment builder is not connected to the active controller. This book distinguishes working challenge features from unfinished areas.
 
 ## 2. The Learning Idea
 
@@ -43,7 +43,7 @@ The examples use familiar themes such as sales, student engagement, and event ac
 
 ## 3. Three Ways to Grow
 
-SunnyStudy groups lessons into three learning tracks. Each track currently has ten lesson entries in the application code.
+SunnyStudy has three certifications. Each currently contains five courses with eight challenges per course, for 40 challenges per certification. Five challenges in each certification are course-ending projects with blank starter code and no hints or solutions. Six practice challenges per course are generated from reusable templates.
 
 ### L1: Analyst
 
@@ -63,48 +63,48 @@ SQL, Excel, Python, and Power BI labels organize lessons by the kind of work the
 
 ## 4. A Tour of the Workspace
 
-The Learning Lab is organized into three work areas:
+The Learning Lab is organized as a curriculum sidebar and three work areas:
 
-1. **Original file:** a preview of the active sample rows and columns.
-2. **Command console:** a tool-themed editor and a run control.
-3. **Visual result:** a lesson summary, a small output table, a chart, and command feedback.
+1. **Instructions:** challenge description, example, hints, and the active dataset preview.
+2. **Code editor:** editable textarea with line numbers, Run tests, Reset, Hint, and Solution controls.
+3. **Results:** test checklist, returned rows, chart, and runtime output.
 
-The left syllabus controls the layer, tool, and lesson. A small dataset list provides three built-in examples: sales, student engagement, and events. The toolbar provides project saving, CSV export, a project gallery, and a local student-help counter.
+The sidebar groups challenges into collapsible courses. The built-in datasets cover sales, student engagement, events, and user records. CSV and JSON files can be imported into the in-memory active dataset. The toolbar provides local project saving, CSV export, certification progress, study streak, and a project gallery.
 
-An Assignment Builder is also present in the page markup, with fields for a student, institution, course, and assignment text. Its print action is connected, but the complete page navigation, live preview, and editor workflow are not yet fully connected in the current JavaScript.
+An Assignment Builder is also present in the page markup, with fields for a student, institution, course, and assignment text. It is not connected to the active page-navigation and challenge controller; its live preview, editor workflow, and print experience are therefore unfinished.
 
 ## 5. What Happens When You Run a Lesson
 
 Here is the current flow from selecting a lesson to seeing a result:
 
-1. The browser loads `index.html`, `styles.css`, and `app.js`.
-2. `app.js` defines the lesson catalog, sample rows, current layer, current tool, and UI event handlers.
-3. Selecting a lesson places its example command in the selected editor and displays the associated sample dataset.
-4. The Run control checks the text for familiar patterns such as `SELECT`, `SUM`, `corr`, or `COUNTIF`.
-5. A matching demonstration function returns a prepared explanation and sample-based rows. This is not a general SQL parser, spreadsheet engine, Python interpreter, or Power BI model.
-6. The result table is refreshed, and Chart.js draws a chart when its CDN script is available.
+1. The browser loads the static app shell and runtime libraries from CDNs.
+2. `app.js` expands the certification catalog and restores local progress.
+3. Selecting a challenge loads its instructions, starter code, tests, and sample dataset.
+4. Run dispatches SQL to sql.js, formulas to HyperFormula, Python to Pyodide, or chart specifications to Chart.js.
+5. Test callbacks inspect actual engine results and code requirements, then update the checklist and local certification progress.
 
-This teaching simulation makes the current project useful for discussing the shape of an analysis workflow. It should not be used to validate arbitrary code or to produce authoritative results for a real dataset.
+This is genuine browser-side execution for the supported challenge types, not a general-purpose data platform. Queries operate on a temporary local table, Python packages may be unavailable, charting is not Microsoft's Power BI service, and user imports may not match the columns expected by a challenge.
 
 ### Browser runtimes
 
-Pyodide is referenced from a CDN and requested when a Scientist lesson is run. Its current call reports the command and a sample row count; it does not execute the command as a prepared pandas notebook. A DuckDB-WASM helper is present for the Engineer track, but it does not currently execute the command entered by the learner. The page also references PapaParse, HyperFormula, and sql.js, but the current app logic does not call those libraries.
+Pyodide is loaded on demand and runs challenge Python code with a `rows` value decoded from the active dataset. sql.js creates an in-memory table named `data` and runs the submitted SQL via `db.exec`. HyperFormula calculates submitted formulas. Chart.js renders actual charts from JSON chart specifications and tests the resulting grouped values. Papa Parse reads CSV files; JSON imports use the browser's JSON parser. DuckDB-WASM is referenced by an unused legacy helper and is not part of the active challenge runner.
 
 ## 6. Projects, Data, and Privacy
 
 ### Sample data
 
-The application includes three small JavaScript datasets:
+The application includes four small JavaScript datasets:
 
 - Sales by month, with revenue, orders, and region.
 - Student engagement, with attendance, completed labs, and scores.
 - Events, with dates, countries, amounts, and channels.
+- Users, with identifiers, email values, and countries for data-quality practice.
 
-The dataset list selects among these in-memory examples. Although the page includes an Import Data file input, CSV and JSON file loading is not yet connected. The starter data is not persisted as an imported dataset.
+The dataset list selects among these in-memory examples. CSV/JSON imports replace the active dataset for the current session; imports are not saved to local storage or IndexedDB, and the learner can restore a bundled sample from the instruction panel.
 
 ### Saved projects
 
-When a project is saved, SunnyStudy stores a project name, the selected layer and tool, the lesson title, a timestamp, a small dataset snapshot, and a generated preview image. The gallery reads project entries from `localStorage`. The same project is also written to an IndexedDB object store as an additional local copy.
+When a project is saved or a capstone passes without viewing a solution, SunnyStudy stores the layer, tool, lesson, timestamp, code, and a small dataset snapshot. The gallery reads entries from `localStorage`. Projects are also written to an IndexedDB object store, but the gallery does not currently restore entries by reading IndexedDB.
 
 The app does not send these project records to a SunnyStudy server. Browser storage is local to the current browser profile and can be removed by clearing site data. A saved project is a snapshot, not a collaborative cloud document.
 
@@ -114,7 +114,7 @@ The export control downloads the current result rows as a CSV file. It exports t
 
 ### Student-help counter
 
-The counter is a local interaction tally kept in `localStorage`. It is not a count of unique students and is not sent to a server. It can be reset by clearing this site's browser data.
+The help counter is stored as part of `sunnystudy_progress` and increases when hints or solutions are revealed. It is not a count of unique students and is not sent to a server. It can be reset by clearing this site's browser data.
 
 ## 7. The Technology Behind the Workshop
 
@@ -154,7 +154,7 @@ The files can be served by GitHub Pages or another static host. Place the app fi
 
 ### What offline means here
 
-After a successful visit, the service worker attempts to cache the local application shell. Its cache uses a versioned name, currently `sunnystudy-v1`. The browser still may need a network connection for third-party fonts and scripts, especially on the first visit. Offline support is therefore partial rather than a guarantee that every feature works without a network.
+After a successful visit, the service worker attempts to cache the local application shell and successful GET responses. Its cache uses a versioned name, currently `sunnystudy-v3`. The browser still may need a network connection for third-party fonts and runtime assets, especially on first load. Offline support is best-effort, not a guarantee that every runtime works without a network.
 
 ## 9. What Works Today
 
@@ -162,29 +162,26 @@ This table summarizes the current code rather than the eventual product directio
 
 | Area | Current status |
 | --- | --- |
-| Layer and lesson selection | Implemented for the bundled lesson catalog |
-| Sample dataset previews | Implemented for the bundled examples |
-| Command practice | Pattern-based demonstration results, not full language execution |
-| Charts | Chart.js visualization when the CDN dependency loads |
-| Project gallery | Local project entries stored in `localStorage` |
-| Project backup | Project entries are also written to IndexedDB |
-| CSV output export | Implemented for the current result rows |
-| CSV/JSON input import | File input is present; parsing and loading are not wired |
-| Python runtime | Pyodide load hook is present; lesson commands are not executed as notebook code |
-| DuckDB runtime | Helper is incomplete; entered SQL is not executed by DuckDB |
-| Spreadsheet engine | HyperFormula is referenced but not integrated |
-| Assignment builder | Interface and print button exist; full interaction flow is incomplete |
-| Offline support | Local shell caching is implemented; CDN assets may still need a network |
+| Certification courses and challenges | 3 certifications, 5 courses × 8 challenges each |
+| SQL challenges | Executed locally by sql.js against a temporary table |
+| Spreadsheet challenges | Calculated by HyperFormula; generated ranges need care for imported datasets |
+| Python challenges | Run in Pyodide; packages beyond its base runtime are not preinstalled |
+| Chart challenges | Chart specifications are rendered and checked with Chart.js |
+| CSV/JSON import | Connected; parsed data replaces the active in-memory dataset |
+| Progress, hints, streak | Stored in `sunnystudy_progress` in localStorage |
+| Certification gallery | Saves code and project data in localStorage and writes a secondary IndexedDB copy |
+| Assignment builder | Markup remains but active navigation, editing, and print flow are unfinished |
+| Offline support | Versioned app-shell cache with best-effort GET caching; CDN/WASM availability is not guaranteed |
 
 ## 10. Where SunnyStudy Can Go Next
 
 The most useful next development steps are practical and testable:
 
-1. **Import real data:** parse CSV and JSON, validate row shapes, show a preview, and make the imported dataset the one used by the lesson.
-2. **Execute real commands:** integrate each browser runtime behind a small adapter, and make clear which engine is active. Start with one tool and a safe, narrow lesson set.
-3. **Finish the assignment flow:** connect navigation, live cover fields, assignment text, autosave, and print layout.
-4. **Strengthen offline behavior:** pin compatible CDN assets, add explicit offline states, and test a clean first load and a repeat offline load.
-5. **Add learner-facing explanations:** show how a command maps to each output and let students compare their expected result with the demonstration.
+1. **Deepen instruction:** author richer lessons for template-generated challenges and expand test coverage beyond code-pattern checks.
+2. **Harden imported-data support:** validate schemas and adapt formula ranges and challenge expectations to varying columns and row counts.
+3. **Build substantial capstones:** make projects multi-step and portfolio-worthy rather than single-command checks.
+4. **Finish the assignment flow:** connect navigation, live cover fields, assignment text, autosave, and print layout.
+5. **Strengthen offline behavior:** pin compatible CDN assets, add explicit offline states, and test clean first load and repeat offline use.
 
 The guiding constraint should stay simple: add capability without pretending a simulation is a production engine. A learner should always be able to tell what ran, what data it used, and where the result was stored.
 

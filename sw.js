@@ -1,10 +1,11 @@
-const CACHE_NAME = 'sunnystudy-v2';
+const CACHE_NAME = 'sunnystudy-v3';
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
-  './manifest.json'
+  './manifest.json',
+  './sw.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,7 +34,12 @@ self.addEventListener('fetch', (event) => {
             .then((cache) => cache.put(event.request, response.clone()).catch(() => undefined))
             .then(() => response);
         })
-        .catch(() => caches.match('./index.html'));
+        .catch(() => {
+          if (event.request.mode === 'navigate') {
+            return caches.match(new URL('./index.html', self.registration.scope).href);
+          }
+          return Response.error();
+        })
     })
   );
 });

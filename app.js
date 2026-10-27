@@ -57,7 +57,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Excel for Analysts',
         challenges: [
-          makeChallenge('a1', 'Sum North region revenue', 'excel', 'Use `SUMIF` to total revenue for rows whose region is North.', '=SUMIF(D2:D13,"North",B2:B13)', ['`SUMIF` takes a criteria range, a criterion, and a sum range.'], '=SUMIF(D2:D13,"North",B2:B13)', [
+          makeChallenge('a1', 'Sum North region revenue', 'excel', 'Use `SUMIF` to total revenue for rows whose region is North.', '=SUMIF(?, ?, ?)', ['`SUMIF` takes a criteria range, a criterion, and a sum range.'], '=SUMIF(D2:D13,"North",B2:B13)', [
             checkFormula('Should use SUMIF', /SUMIF/i), checkNumber('Should total North revenue', (data) => totalWhere(data, 'region', 'North', 'revenue'))
           ]),
           makeProject('a2', 'Project: Regional revenue workbook', 'excel', 'Build a formula that totals all revenue in the active worksheet.', '', [], null, [
@@ -68,7 +68,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'SQL Foundations',
         challenges: [
-          makeChallenge('a3', 'Filter North region rows', 'sql', 'Return only rows where the region is North.', "SELECT * FROM data WHERE region = 'North';", ['Start with `SELECT * FROM data`, then add a `WHERE` condition.'], "SELECT * FROM data WHERE region = 'North';", [
+          makeChallenge('a3', 'Filter North region rows', 'sql', 'Return only rows where the region is North.', 'SELECT * FROM data;', ['Start with `SELECT * FROM data`, then add a `WHERE` condition.'], "SELECT * FROM data WHERE region = 'North';", [
             checkSql('Should filter with WHERE', /where/i), checkRows('Every returned row should be North', (rows) => rows.length > 0 && rows.every((row) => row.region === 'North'))
           ]),
           makeProject('a4', 'Project: Revenue by region', 'sql', 'Build a grouped revenue summary from the active dataset.', '', [], null, [
@@ -79,7 +79,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Python Data Inspection',
         challenges: [
-          makeChallenge('a5', 'Count the dataset rows', 'python', 'Use Python to count the rows provided in `rows`.', 'row_count = len(rows)', ['The built-in `len` function counts list items.'], 'row_count = len(rows)', [
+          makeChallenge('a5', 'Count the dataset rows', 'python', 'Use Python to count the rows provided in `rows`.', 'row_count = 0', ['The built-in `len` function counts list items.'], 'row_count = len(rows)', [
             checkPython('Should define row_count', /row_count\s*=/), checkPythonValue('row_count', (data) => data.length)
           ]),
           makeProject('a6', 'Project: Revenue quality audit', 'python', 'Calculate total revenue from every record in `rows`.', '', [], null, [
@@ -90,7 +90,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Power BI Visual Stories',
         challenges: [
-          makeChallenge('a7', 'Choose a regional revenue chart', 'powerbi', 'Describe a chart using the dataset category, measure, and chart type.', '{"category":"region","value":"revenue","type":"bar"}', ['Use JSON with category, value, and type properties.'], '{"category":"region","value":"revenue","type":"bar"}', [
+          makeChallenge('a7', 'Choose a regional revenue chart', 'powerbi', 'Describe a chart using the dataset category, measure, and chart type.', '{"category":"","value":"","type":"bar"}', ['Use JSON with category, value, and type properties.'], '{"category":"region","value":"revenue","type":"bar"}', [
             checkChart('Should group by region', (chart) => chart.category === 'region'), checkChart('Should use revenue as the measure', (chart) => chart.value === 'revenue' && chart.points.length > 0)
           ]),
           makeProject('a8', 'Project: Build a sales dashboard chart', 'powerbi', 'Create a chart specification from scratch for monthly revenue.', '', [], null, [
@@ -101,7 +101,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Analyst Portfolio',
         challenges: [
-          makeChallenge('a9', 'Find the highest revenue row', 'sql', 'Return the highest-revenue record using SQL ordering.', 'SELECT * FROM data ORDER BY revenue DESC LIMIT 1;', ['Sort descending, then keep one row.'], 'SELECT * FROM data ORDER BY revenue DESC LIMIT 1;', [
+          makeChallenge('a9', 'Find the highest revenue row', 'sql', 'Return the highest-revenue record using SQL ordering.', 'SELECT * FROM data;', ['Sort descending, then keep one row.'], 'SELECT * FROM data ORDER BY revenue DESC LIMIT 1;', [
             checkSql('Should sort revenue descending', /order\s+by\s+revenue\s+desc/i), checkSqlRows('Should return one top record', (rows) => rows.length === 1 && Number(rows[0].revenue) > 0)
           ]),
           makeProject('a10', 'Certification Project: Executive revenue insight', 'sql', 'Build a query that returns the total revenue as one named value.', '', [], null, [
@@ -117,7 +117,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Statistics with Python',
         challenges: [
-          makeChallenge('s1', 'Calculate average revenue', 'python', 'Use the standard library to calculate the mean revenue from `rows`.', 'import statistics\nmean_revenue = statistics.mean(row["revenue"] for row in rows)', ['`statistics.mean` accepts an iterable of numbers.'], 'import statistics\nmean_revenue = statistics.mean(row["revenue"] for row in rows)', [
+          makeChallenge('s1', 'Calculate average revenue', 'python', 'Use the standard library to calculate the mean revenue from `rows`.', 'mean_revenue = 0', ['`statistics.mean` accepts an iterable of numbers.'], 'import statistics\nmean_revenue = statistics.mean(row["revenue"] for row in rows)', [
             checkPython('Should calculate a mean', /statistics\.mean/i), checkPythonValue('mean_revenue', (data) => total(data, 'revenue') / data.length)
           ]),
           makeProject('s2', 'Project: Score distribution summary', 'python', 'Calculate the mean score from `rows` as `mean_score`.', '', [], null, [
@@ -128,7 +128,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Time Series and Trends',
         challenges: [
-          makeChallenge('s3', 'Calculate a three-row moving average', 'python', 'Create `moving_average` from revenue values using a three-row window.', 'values = [row["revenue"] for row in rows]\nmoving_average = [sum(values[i - 2:i + 1]) / 3 for i in range(2, len(values))]', ['Build windows from index 2 onward; each window contains three values.'], 'values = [row["revenue"] for row in rows]\nmoving_average = [sum(values[i - 2:i + 1]) / 3 for i in range(2, len(values))]', [
+          makeChallenge('s3', 'Calculate a three-row moving average', 'python', 'Create `moving_average` from revenue values using a three-row window.', 'moving_average = []', ['Build windows from index 2 onward; each window contains three values.'], 'values = [row["revenue"] for row in rows]\nmoving_average = [sum(values[i - 2:i + 1]) / 3 for i in range(2, len(values))]', [
             checkPython('Should define a three-value moving average', /range\s*\(\s*2\s*,/), checkPythonArrayLength('moving_average', (data) => Math.max(0, data.length - 2))
           ]),
           makeProject('s4', 'Project: Forecast baseline', 'python', 'Build `forecast` as the mean of the last three revenue rows.', '', [], null, [
@@ -139,7 +139,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Experiments and Cohorts',
         challenges: [
-          makeChallenge('s5', 'Compare experiment conversion rates', 'excel', 'Calculate the relative change from a 12% baseline to a 15% treatment rate.', '=((15%-12%)/12%)', ['Relative lift is (treatment - baseline) / baseline.'], '=((15%-12%)/12%)', [
+          makeChallenge('s5', 'Compare experiment conversion rates', 'excel', 'Calculate the relative change from a 12% baseline to a 15% treatment rate.', '=0', ['Relative lift is (treatment - baseline) / baseline.'], '=((15%-12%)/12%)', [
             checkFormula('Should compare both conversion rates', /15%/), checkNumber('Should return 0.25 relative lift', () => 0.25)
           ]),
           makeProject('s6', 'Project: Cohort revenue comparison', 'sql', 'Group active records by region and calculate average revenue.', '', [], null, [
@@ -150,7 +150,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Machine Learning Foundations',
         challenges: [
-          makeChallenge('s7', 'Compute a feature correlation', 'python', 'Use `statistics.correlation` on attendance and score columns.', 'import statistics\nscore_correlation = statistics.correlation([row["attendance"] for row in rows], [row["score"] for row in rows])', ['Pass two lists of equal length to `statistics.correlation`.'], 'import statistics\nscore_correlation = statistics.correlation([row["attendance"] for row in rows], [row["score"] for row in rows])', [
+          makeChallenge('s7', 'Compute a feature correlation', 'python', 'Use `statistics.correlation` on attendance and score columns.', 'score_correlation = 0', ['Pass two lists of equal length to `statistics.correlation`.'], 'import statistics\nscore_correlation = statistics.correlation([row["attendance"] for row in rows], [row["score"] for row in rows])', [
             checkPython('Should use a correlation calculation', /correlation\s*\(/i), checkPythonRange('score_correlation', -1, 1)
           ], { dataset: 'engagement' }),
           makeProject('s8', 'Project: Build an anomaly flag', 'python', 'Create `anomalies` containing revenue rows greater than the mean revenue.', '', [], null, [
@@ -161,7 +161,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Research Communication',
         challenges: [
-          makeChallenge('s9', 'Summarize engagement by student', 'sql', 'Return each student and their average score.', 'SELECT student, AVG(score) AS average_score FROM data GROUP BY student;', ['Select the student field and aggregate score with `AVG`.'], 'SELECT student, AVG(score) AS average_score FROM data GROUP BY student;', [
+          makeChallenge('s9', 'Summarize engagement by student', 'sql', 'Return each student and their average score.', 'SELECT * FROM data;', ['Select the student field and aggregate score with `AVG`.'], 'SELECT student, AVG(score) AS average_score FROM data GROUP BY student;', [
             checkSql('Should use AVG and GROUP BY', /avg\s*\(/i, /group\s+by/i), checkSqlRows('Should return students with numeric scores', (rows) => rows.length > 0 && rows.every((row) => 'student' in row && Number.isFinite(Number(row.average_score))))
           ], { dataset: 'engagement' }),
           makeProject('s10', 'Certification Project: Research-ready findings', 'powerbi', 'Create a chart spec showing student scores by student.', '', [], null, [
@@ -177,7 +177,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Warehouse SQL',
         challenges: [
-          makeChallenge('e1', 'Select clean event records', 'sql', 'Return events with a non-empty country value.', "SELECT * FROM data WHERE country IS NOT NULL AND country != '';", ['Use `IS NOT NULL` and exclude empty strings.'], "SELECT * FROM data WHERE country IS NOT NULL AND country != '';", [
+          makeChallenge('e1', 'Select clean event records', 'sql', 'Return events with a non-empty country value.', 'SELECT * FROM data;', ['Use `IS NOT NULL` and exclude empty strings.'], "SELECT * FROM data WHERE country IS NOT NULL AND country != '';", [
             checkSql('Should validate null and empty countries', /is\s+not\s+null/i, /!=\s*''|<>\s*''/), checkSqlRows('Every row should have a country', (rows) => rows.length > 0 && rows.every((row) => row.country))
           ], { dataset: 'events' }),
           makeProject('e2', 'Project: Build a country revenue fact', 'sql', 'Aggregate event amount by country and order largest first.', '', [], null, [
@@ -188,7 +188,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Python Data Pipelines',
         challenges: [
-          makeChallenge('e3', 'Normalize revenue values', 'python', 'Create a clean list of numeric revenues named `clean_revenue`.', 'clean_revenue = [float(row["revenue"]) for row in rows if row.get("revenue") is not None]', ['Convert each non-null value with `float`.'], 'clean_revenue = [float(row["revenue"]) for row in rows if row.get("revenue") is not None]', [
+          makeChallenge('e3', 'Normalize revenue values', 'python', 'Create a clean list of numeric revenues named `clean_revenue`.', 'clean_revenue = []', ['Convert each non-null value with `float`.'], 'clean_revenue = [float(row["revenue"]) for row in rows if row.get("revenue") is not None]', [
             checkPython('Should convert values to floats', /float\s*\(/), checkPythonArrayLength('clean_revenue', (data) => data.filter((row) => row.revenue != null).length)
           ]),
           makeProject('e4', 'Project: Build a clean event pipeline', 'python', 'Create `clean_events` with rows whose amount is a positive number.', '', [], null, [
@@ -199,7 +199,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Data Quality and Validation',
         challenges: [
-          makeChallenge('e5', 'Count invalid email rows', 'sql', 'Count rows with a null email in the active dataset.', 'SELECT COUNT(*) AS invalid_rows FROM data WHERE email IS NULL;', ['Use `COUNT(*)` and filter with `IS NULL`.'], 'SELECT COUNT(*) AS invalid_rows FROM data WHERE email IS NULL;', [
+          makeChallenge('e5', 'Count invalid email rows', 'sql', 'Count rows with a null email in the active dataset.', 'SELECT COUNT(*) AS invalid_rows FROM data;', ['Use `COUNT(*)` and filter with `IS NULL`.'], 'SELECT COUNT(*) AS invalid_rows FROM data WHERE email IS NULL;', [
             checkSql('Should count null values', /count\s*\(\s*\*\s*\)/i, /is\s+null/i), checkSqlRows('Should return one numeric count', (rows) => rows.length === 1 && Number.isFinite(Number(rows[0].invalid_rows)))
           ], { dataset: 'users' }),
           makeProject('e6', 'Project: Validate event amounts', 'python', 'Create `valid_events` with only rows that have a positive amount and country.', '', [], null, [
@@ -210,7 +210,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Data Observability',
         challenges: [
-          makeChallenge('e7', 'Visualize rows by channel', 'powerbi', 'Build a bar chart that groups event amounts by channel.', '{"category":"channel","value":"amount","type":"bar"}', ['Choose a category field and numeric amount field.'], '{"category":"channel","value":"amount","type":"bar"}', [
+          makeChallenge('e7', 'Visualize rows by channel', 'powerbi', 'Build a bar chart that groups event amounts by channel.', '{"category":"","value":"","type":"bar"}', ['Choose a category field and numeric amount field.'], '{"category":"channel","value":"amount","type":"bar"}', [
             checkChart('Should group by channel', (chart) => chart.category === 'channel'), checkChart('Should use event amount', (chart) => chart.value === 'amount' && chart.points.length > 0)
           ], { dataset: 'events' }),
           makeProject('e8', 'Project: Ingestion observability chart', 'powerbi', 'Build a chart of revenue by month from scratch.', '', [], null, [
@@ -221,7 +221,7 @@ const DATA_CERTIFICATIONS = {
       {
         title: 'Engineer Certification Project',
         challenges: [
-          makeChallenge('e9', 'Deduplicate countries in SQL', 'sql', 'Return one row per country with its total event amount.', 'SELECT country, SUM(amount) AS total_amount FROM data GROUP BY country;', ['Aggregate the amount and group by country.'], 'SELECT country, SUM(amount) AS total_amount FROM data GROUP BY country;', [
+          makeChallenge('e9', 'Deduplicate countries in SQL', 'sql', 'Return one row per country with its total event amount.', 'SELECT * FROM data;', ['Aggregate the amount and group by country.'], 'SELECT country, SUM(amount) AS total_amount FROM data GROUP BY country;', [
             checkSql('Should aggregate amount by country', /sum\s*\(\s*amount\s*\)/i, /group\s+by\s+country/i), checkSqlRows('Should return numeric totals', (rows) => rows.length > 0 && rows.every((row) => Number.isFinite(Number(row.total_amount))))
           ], { dataset: 'events' }),
           makeProject('e10', 'Certification Project: Publish a reliable data product', 'python', 'Build `published_rows` containing only complete rows from the active dataset.', '', [], null, [
@@ -239,7 +239,12 @@ function makeChallenge(id, title, tool, descriptionMD, starterCode, hints, solut
     title,
     tool,
     descriptionMD,
-    example: options.example || starterCode,
+    example: options.example || ({
+      sql: 'SELECT columns FROM data WHERE condition;',
+      excel: '=SUMIF(criteria_range, criterion, sum_range)',
+      python: 'result = transform(rows)',
+      powerbi: '{"category":"group","value":"measure","type":"bar"}'
+    }[tool] || starterCode),
     starterCode,
     hints,
     solution,
@@ -302,6 +307,138 @@ function checkPythonRange(name, minimum, maximum) {
 
 function checkChart(text, predicate) {
   return { text, fn: ({ result, data }) => Boolean(result.chart) && predicate(result.chart, data) };
+}
+
+function expandCourseCurriculum() {
+  if (state.curriculumExpanded) return;
+  state.curriculumExpanded = true;
+  Object.entries(DATA_CERTIFICATIONS).forEach(([layer, certification]) => {
+    certification.courses.forEach((course, courseIndex) => {
+      const base = course.challenges[0];
+      const dataset = SAMPLE_DATA[base.dataset] || SAMPLE_DATA.sales;
+      const keys = Object.keys(dataset[0] || {});
+      const numericKey = keys.find((key) => dataset.some((row) => row[key] != null && Number.isFinite(Number(row[key]))));
+      const textKey = keys.find((key) => dataset.some((row) => typeof row[key] === 'string'));
+      const extras = makeCoursePractice(layer, course, courseIndex, dataset, numericKey, textKey);
+      course.challenges.splice(1, 0, ...extras);
+    });
+  });
+}
+
+function makeCoursePractice(layer, course, courseIndex, data, numericKey, textKey) {
+  const tool = course.challenges[0].tool;
+  const dataName = course.challenges[0].dataset;
+  const idPrefix = `${layer[0]}${courseIndex + 1}`;
+  const practiceChallenge = (index, title, description, starter, solution, tests) => makeChallenge(
+    `${idPrefix}-practice-${index + 1}`,
+    `${title} · ${course.title}`,
+    tool,
+    description,
+    starter,
+    ['Use the active dataset and the operation named in the instructions. Check the output value and the test conditions.'],
+    solution,
+    tests,
+    { dataset: dataName }
+  );
+
+  if (tool === 'sql') {
+    const textColumn = textKey || Object.keys(data[0] || {})[0];
+    const valueColumn = numericKey || 'revenue';
+    const sqlQuote = (field) => `"${field.replace(/"/g, '""')}"`;
+    return [
+      practiceChallenge(0, 'Count input rows', 'Write a scalar SQL query that counts all rows in `data`.', 'SELECT * FROM data;', 'SELECT COUNT(*) AS row_count FROM data;', [
+        checkSql('Should use COUNT(*)', /count\s*\(\s*\*\s*\)/i), checkSqlRows('Should count every input row', (rows, active) => rows.length === 1 && Number(rows[0].row_count) === active.length)
+      ]),
+      practiceChallenge(1, `Filter non-null ${textColumn}`, `Return records where **${textColumn}** is present.`, 'SELECT * FROM data;', `SELECT * FROM data WHERE ${sqlQuote(textColumn)} IS NOT NULL;`, [
+        checkSql('Should filter null values', /where/i, /is\s+not\s+null/i), checkSqlRows(`Every returned ${textColumn} should be present`, (rows) => rows.length > 0 && rows.every((row) => row[textColumn] != null))
+      ]),
+      practiceChallenge(2, `Sort by ${valueColumn}`, `Return one row with the highest **${valueColumn}** value.`, 'SELECT * FROM data;', `SELECT * FROM data ORDER BY ${sqlQuote(valueColumn)} DESC LIMIT 1;`, [
+        checkSql('Should sort descending and limit results', /order\s+by/i, /desc/i, /limit\s+1/i), checkSqlRows('Should return a numeric maximum', (rows, active) => rows.length === 1 && Number(rows[0][valueColumn]) === Math.max(...active.map((row) => Number(row[valueColumn]) || 0)))
+      ]),
+      practiceChallenge(3, `Sum ${valueColumn}`, `Calculate the total **${valueColumn}** using SQL aggregation.`, 'SELECT * FROM data;', `SELECT SUM(${sqlQuote(valueColumn)}) AS total_value FROM data;`, [
+        checkSql('Should use SUM', /sum\s*\(/i), checkSqlRows('Should match the input sum', (rows, active) => rows.length === 1 && Number(rows[0].total_value) === total(active, valueColumn))
+      ]),
+      practiceChallenge(4, `Average ${valueColumn}`, `Calculate the average **${valueColumn}** and return one scalar.`, 'SELECT * FROM data;', `SELECT AVG(${sqlQuote(valueColumn)}) AS average_value FROM data;`, [
+        checkSql('Should use AVG', /avg\s*\(/i), checkSqlRows('Should match the input average', (rows, active) => rows.length === 1 && Math.abs(Number(rows[0].average_value) - total(active, valueColumn) / active.length) < 0.000001)
+      ]),
+      practiceChallenge(5, `List distinct ${textColumn} values`, `Return unique values from **${textColumn}**.`, 'SELECT * FROM data;', `SELECT DISTINCT ${sqlQuote(textColumn)} FROM data;`, [
+        checkSql('Should use DISTINCT', /select\s+distinct/i), checkSqlRows('Should return unique non-null categories', (rows) => rows.length > 0 && new Set(rows.map((row) => Object.values(row)[0])).size === rows.length)
+      ])
+    ];
+  }
+
+  if (tool === 'excel') {
+    const field = numericKey || Object.keys(data[0] || {})[0];
+    const columnIndex = Object.keys(data[0] || {}).indexOf(field);
+    const columnName = excelColumn(columnIndex);
+    const startRow = 2;
+    const endRow = data.length + 1;
+    const range = `${columnName}${startRow}:${columnName}${endRow}`;
+    const activeValues = (active) => active.map((row) => Number(row[field])).filter(Number.isFinite);
+    return [
+      ['SUM', 'Sum values', `Use SUM to total **${field}** from the active sheet.`, `=SUM(${range})`, (active) => activeValues(active).reduce((sum, value) => sum + value, 0)],
+      ['AVERAGE', 'Average values', `Use AVERAGE to calculate the mean **${field}**.`, `=AVERAGE(${range})`, (active) => activeValues(active).reduce((sum, value) => sum + value, 0) / activeValues(active).length],
+      ['MAX', 'Find the maximum', `Use MAX to find the largest **${field}**.`, `=MAX(${range})`, (active) => Math.max(...activeValues(active))],
+      ['MIN', 'Find the minimum', `Use MIN to find the smallest **${field}**.`, `=MIN(${range})`, (active) => Math.min(...activeValues(active))],
+      ['COUNTA', 'Count filled cells', `Use COUNTA to count non-empty **${field}** cells.`, `=COUNTA(${range})`, (active) => active.filter((row) => row[field] != null && row[field] !== '').length],
+      ['COUNT', 'Count numeric cells', `Use COUNT to count numeric **${field}** cells.`, `=COUNT(${range})`, (active) => activeValues(active).length]
+    ].map(([fn, title, description, solution, expected], index) => practiceChallenge(index, title, description, '=0', solution, [
+      checkFormula(`Should use ${fn}`, new RegExp(`^\\s*=${fn}\\s*\\(`, 'i')),
+      checkNumber(`Should return the correct ${field} result`, expected)
+    ]));
+  }
+
+  if (tool === 'python') {
+    const field = numericKey || Object.keys(data[0] || {})[0];
+    const values = data.map((row) => Number(row[field])).filter(Number.isFinite);
+    const expectedSum = values.reduce((sum, value) => sum + value, 0);
+    const expectedMax = Math.max(...values);
+    return [
+      practiceChallenge(0, 'Count input rows', 'Use `len` to store the number of records in `row_count`.', 'row_count = 0', 'row_count = len(rows)', [
+        checkPython('Should use len(rows)', /len\s*\(\s*rows\s*\)/), checkPythonValue('row_count', (active) => active.length)
+      ]),
+      practiceChallenge(1, `Sum ${field}`, `Add all **${field}** values and store the result in \`total_value\`.`, 'total_value = 0', `total_value = sum(float(row["${field}"]) for row in rows)`, [
+        checkPython('Should sum the selected field', /sum\s*\(/, new RegExp(field)), checkPythonValue('total_value', (active) => total(active, field))
+      ]),
+      practiceChallenge(2, `Find maximum ${field}`, `Find the largest **${field}** value and store it in \`maximum_value\`.`, 'maximum_value = 0', `maximum_value = max(float(row["${field}"]) for row in rows)`, [
+        checkPython('Should use max on the selected field', /max\s*\(/, new RegExp(field)), checkPythonValue('maximum_value', (active) => Math.max(...active.map((row) => Number(row[field]) || 0)))
+      ]),
+      practiceChallenge(3, `Filter positive ${field}`, `Create \`positive_rows\` containing records with positive **${field}** values.`, 'positive_rows = []', `positive_rows = [row for row in rows if float(row["${field}"]) > 0]`, [
+        checkPython('Should filter on a positive value', />\s*0/, new RegExp(field)), checkPythonArrayLength('positive_rows', (active) => active.filter((row) => Number(row[field]) > 0).length)
+      ]),
+      practiceChallenge(4, 'Create a unique category list', `Create \`unique_values\` from the distinct values in **${textKey || field}**.`, 'unique_values = []', `unique_values = sorted(set(row["${textKey || field}"] for row in rows))`, [
+        checkPython('Should use set to deduplicate', /set\s*\(/), checkPythonArrayLength('unique_values', (active) => new Set(active.map((row) => row[textKey || field])).size)
+      ]),
+      practiceChallenge(5, `Calculate mean ${field}`, `Calculate the average **${field}** as \`mean_value\`.`, 'mean_value = 0', `mean_value = sum(float(row["${field}"]) for row in rows) / len(rows)`, [
+        checkPython('Should calculate sum divided by row count', /sum\s*\(/, /len\s*\(/), checkPythonValue('mean_value', (active) => total(active, field) / active.length)
+      ])
+    ];
+  }
+
+  const category = textKey || Object.keys(data[0] || {})[0];
+  const measure = numericKey || 'revenue';
+  const specification = (type) => JSON.stringify({ category, value: measure, type });
+  return ['bar', 'line', 'doughnut', 'bar', 'line', 'doughnut'].map((type, index) => practiceChallenge(index,
+    `Build ${type} chart ${index + 1}`,
+    `Create a real **${type}** chart grouped by **${category}** with **${measure}** values.`,
+    '{"category":"","value":"","type":"bar"}',
+    specification(type),
+    [
+      checkChart(`Should group by ${category}`, (chart) => chart.category === category),
+      checkChart(`Should plot ${measure} with ${type}`, (chart) => chart.value === measure && chart.type === type && chart.points.length > 0)
+    ]
+  ));
+}
+
+function excelColumn(index) {
+  let number = index + 1;
+  let label = '';
+  while (number > 0) {
+    const remainder = (number - 1) % 26;
+    label = String.fromCharCode(65 + remainder) + label;
+    number = Math.floor((number - 1) / 26);
+  }
+  return label;
 }
 
 function total(rows, field) {
@@ -953,9 +1090,9 @@ function exportCurrentCsv() {
 function showToast(message) {
   if (!elements.toast) return;
   elements.toast.textContent = message;
-  elements.toast.classList.add('show');
+  elements.toast.classList.add('is-visible');
   clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => elements.toast.classList.remove('show'), 1800);
+  showToast.timer = setTimeout(() => elements.toast.classList.remove('is-visible'), 1800);
 }
 
 function registerServiceWorker() {
@@ -1026,6 +1163,7 @@ function init() {
   state.challengeDrafts = state.progress.drafts || {};
   state.projects = [];
 
+  expandCourseCurriculum();
   bindChallengeEvents();
   renderLayerButtons();
   renderDatasetList();
@@ -1187,8 +1325,9 @@ function createChallenge(lesson) {
   elements.consoleOutput.textContent = '> Edit the challenge code, then run tests.';
   elements.runStatus.textContent = 'Ready';
   elements.runStatus.classList.remove('error', 'success');
-  elements.solutionButton.hidden = true;
-  elements.hintButton.hidden = lesson.isProject || lesson.hints.length === 0 || (state.progress.failures[lesson.id] || 0) < 2;
+  const failures = state.progress.failures[lesson.id] || 0;
+  elements.hintButton.hidden = lesson.isProject || lesson.hints.length === 0 || failures < 2;
+  elements.solutionButton.hidden = lesson.isProject || !lesson.solution || failures < 3;
   renderChallengeCurriculum();
   renderActiveDataset();
   renderChart();
@@ -1257,7 +1396,7 @@ async function executeSql(code) {
   if (!window.initSqlJs) throw new Error('sql.js could not load. Check your internet connection and refresh.');
   if (!state.sqlModule) {
     state.sqlModule = await window.initSqlJs({
-      locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/${file}`
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/sql.js@1.11.0/dist/${file}`
     });
   }
   const db = new state.sqlModule.Database();
@@ -1388,6 +1527,7 @@ function handleChallengePass(challenge) {
   }
   state.progress.failures[challenge.id] = 0;
   updateStudyStreak();
+  renderStudyStreak();
   saveProgress();
   renderCertificationProgress();
   if (challenge.isProject && !state.progress.solutionUsed?.[challenge.id]) saveCertificationProject(challenge);

@@ -9,7 +9,7 @@ For the longer introduction to the product and its architecture, read [The Sunny
 ## What It Includes
 
 - Three certifications: Data Analyst, Data Scientist, and Data Engineer.
-- Five courses and ten challenges per certification; every course ends with a no-hint project challenge.
+- Five courses and eight challenges per certification course; every course ends with a no-hint project challenge.
 - SQL, Excel formulas, Python, and chart-building challenges executed with sql.js, HyperFormula, Pyodide, and Chart.js.
 - Built-in datasets plus CSV and JSON import for local practice.
 - Pass/fail test lists, certification progress, study streak, hints after failed runs, and gated solutions.
@@ -51,7 +51,7 @@ Challenge code runs in the browser. SQL is evaluated by sql.js against a tempora
 | Data Scientist | Statistics with Python; Time Series and Trends; Experiments and Cohorts; Machine Learning Foundations; Research Communication | Statistics, cohorts, forecasts, and research findings |
 | Data Engineer | Warehouse SQL; Python Data Pipelines; Data Quality and Validation; Data Observability; Engineer Certification Project | Data cleanup, aggregation, validation, and pipeline checks |
 
-Each certification currently contains ten challenges: one instructional challenge and one project challenge per course. This preserves the existing 30-lesson scope while using the requested five-course certification shape. The curriculum schema is generic and includes an empty Full Stack Python track as a future extension point.
+Each certification currently contains 40 challenges across five courses, including five course-ending projects. The original 30 lesson ideas remain in the catalog, with additional exercises generated from each course's data and tool. The curriculum schema is generic and includes an empty Full Stack Python track as a future extension point.
 
 ## Architecture
 
@@ -67,7 +67,7 @@ The engine libraries are loaded from jsDelivr. Progress, streak, drafts, hints, 
 
 SunnyStudy remains an evolving prototype. The current certification engine executes the listed challenges, but this is not a general-purpose data platform:
 
-- The certification catalog contains ten challenges per layer, rather than eight to ten challenges in each of five courses. Growing to that requested depth requires adding more challenge definitions.
+- Several practice exercises are generated from each course's active tool and dataset; expand these templates with more authored instructions and varied test cases as the curriculum grows.
 - Runtime libraries load from jsDelivr. The first visit needs internet access; the service worker caches successful requests on a best-effort basis, but large WASM runtimes and their dependent assets are not guaranteed to be available offline.
 - SQL challenges run against a temporary table created from the current dataset. They do not connect to external databases.
 - Python challenges execute in the browser sandbox. Pyodide packages beyond its base runtime are not automatically installed.
@@ -92,7 +92,7 @@ No build output is needed. Keep `index.html`, `styles.css`, `app.js`, `manifest.
 
 ## Roadmap
 
-1. Expand each course from two challenges to eight to ten and add richer end-of-course projects.
+1. Add richer written instruction, guided examples, and varied test cases to the generated practice challenges.
 2. Add runtime startup states, package availability checks, and offline-friendly library loading.
 3. Add more CSV schema validation and dataset persistence controls.
 4. Finish the assignment-builder navigation, editing, autosave, and print workflow.

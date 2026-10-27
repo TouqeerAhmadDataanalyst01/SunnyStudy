@@ -826,92 +826,6 @@ function renderChart(rows) {
   }
 }
 
-function handleConsoleRun() {
-  const rawCommand = elements.consoleInput.value.trim();
-  if (!rawCommand) {
-    showToast('Enter a command first.');
-    return;
-  }
-
-  const typed = rawCommand.toLowerCase();
-  let output = '';
-
-  if (typed.includes('select') || typed.includes('group by') || typed.includes('count') || typed.includes('sum') || typed.includes('avg')) {
-    output = runSqlSimulation(rawCommand);
-  } else if (typed.includes('df.') || typed.includes('corr') || typed.includes('kmeans') || typed.includes('rolling')) {
-    output = runPythonSimulation(rawCommand);
-  } else if (typed.includes('=') || typed.includes('sumif') || typed.includes('countif')) {
-    output = runExcelSimulation(rawCommand);
-  } else if (typed.includes('calculate') || typed.includes('revenue') || typed.includes('divid') || typed.includes('story')) {
-    output = runPowerBiSimulation(rawCommand);
-  } else {
-    output = `Command ready: ${rawCommand}\nResult: simulated with the current SunnyStudy dataset.`;
-  }
-
-  const formatted = `> ${rawCommand}\n${output}`;
-  elements.consoleOutput.textContent = formatted;
-
-  if (state.layer === 'engineer') {
-    runDuckDbPipeline(rawCommand).catch(() => undefined);
-  }
-
-  if (state.layer === 'scientist') {
-    runPyodideTask(rawCommand).catch(() => undefined);
-  }
-
-  trackStudentHelp();
-  renderResultTable(state.resultTable);
-  showToast('Analysis updated.');
-}
-
-function runSqlSimulation(command) {
-  const sanitized = command.toLowerCase();
-  const revenueList = SAMPLE_DATA.sales.map((item) => item.revenue);
-  const averageRevenue = Math.round(revenueList.reduce((sum, value) => sum + value, 0) / revenueList.length);
-
-  if (sanitized.includes('group by') || sanitized.includes('sum')) {
-    state.resultTable = SAMPLE_DATA.sales.map((item) => ({ month: item.month, revenue: item.revenue, region: item.region }));
-    return `SQL summary\n- Avg monthly revenue: $${averageRevenue.toLocaleString()}\n- Top month: Dec\n- Result rows: ${state.resultTable.length}`;
-  }
-
-  const top = [...SAMPLE_DATA.sales].sort((a, b) => b.revenue - a.revenue)[0];
-  state.resultTable = [{ month: top.month, revenue: top.revenue, region: top.region }];
-  return `SQL result\n- Highest revenue: $${top.revenue.toLocaleString()} in ${top.month}\n- Region: ${top.region}`;
-}
-
-function runPythonSimulation(command) {
-  if (command.includes('corr')) {
-    state.resultTable = SAMPLE_DATA.engagement.map((student) => ({ student: student.student, score: student.score, attendance: student.attendance }));
-    return 'Python insight\n- Score and attendance are positively related\n- Strongest learners show 90%+ attendance';
-  }
-
-  if (command.includes('kmeans')) {
-    state.resultTable = SAMPLE_DATA.engagement.map((student) => ({ student: student.student, labs: student.labs, score: student.score }));
-    return 'Scientific clustering\n- 3 learner cohorts detected\n- High-engagement cluster: Hira, Ayesha, Sana';
-  }
-
-  state.resultTable = SAMPLE_DATA.engagement;
-  return 'Python preview\n- Dataset size: 6 learners\n- Feature checks passed\n- Ready for notebook analysis';
-}
-
-function runExcelSimulation(command) {
-  const scoreSet = SAMPLE_DATA.engagement.map((student) => student.score);
-  const maximum = Math.max(...scoreSet);
-  const average = Math.round(scoreSet.reduce((sum, item) => sum + item, 0) / scoreSet.length);
-  state.resultTable = SAMPLE_DATA.engagement;
-  return `Excel output\n- Average score: ${average}\n- Maximum score: ${maximum}\n- Suggested action: support the low-performing cohort with labs and coaching.`;
-}
-
-function runPowerBiSimulation(command) {
-  const regionTotal = SAMPLE_DATA.sales.reduce((memo, item) => {
-    memo[item.region] = (memo[item.region] || 0) + item.revenue;
-    return memo;
-  }, {});
-  const strongest = Object.entries(regionTotal).sort((a, b) => b[1] - a[1])[0];
-  state.resultTable = Object.entries(regionTotal).map(([region, revenue]) => ({ region, revenue }));
-  return `Power BI insight\n- Strongest region: ${strongest[0]} ($${strongest[1].toLocaleString()})\n- Dashboard story is ready to publish.`;
-}
-
 async function runPyodideTask(command) {
   if (!window.loadPyodide) {
     return;
@@ -1430,10 +1344,9 @@ async function executeFormula(code) {
   if (!state.activeData.length) throw new Error('The active dataset is empty.');
   const columns = Object.keys(state.activeData[0]);
   const matrix = [columns, ...state.activeData.map((row) => columns.map((column) => row[column] ?? null))];
-  const engine = window.HyperFormula.buildFromArray(matrix, { licenseKey: 'gpl-v3' });
+  const engine = window.HyperFormula.buildFromArray([...matrix, [code]], { licenseKey: 'gpl-v3' });
   try {
     const address = { sheet: 0, row: matrix.length, col: 0 };
-    engine.setCellContents(address, [[code]]);
     const value = engine.getCellValue(address);
     if (value && typeof value === 'object' && value.type === 'ERROR') throw new Error(value.message || 'Formula error.');
     return { value, rows: [{ result: value }] };
@@ -1594,7 +1507,6 @@ function resetChallengeCode() {
   delete state.progress.drafts[challenge.id];
   delete state.progress.failures[challenge.id];
   delete state.progress.hints[challenge.id];
-  if (state.progress.solutionUsed) delete state.progress.solutionUsed[challenge.id];
   elements.hintPanel.hidden = true;
   elements.solutionButton.hidden = true;
   elements.hintButton.hidden = challenge.isProject || challenge.hints.length === 0;

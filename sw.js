@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sunnystudy-v3';
+const CACHE_NAME = 'sunnystudy-v4';
 const ASSETS = [
   './',
   './index.html',

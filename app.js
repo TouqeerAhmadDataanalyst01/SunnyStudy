@@ -104,9 +104,11 @@ const DATA_CERTIFICATIONS = {
           makeChallenge('a9', 'Find the highest revenue row', 'sql', 'Return the highest-revenue record using SQL ordering.', 'SELECT * FROM data;', ['Sort descending, then keep one row.'], 'SELECT * FROM data ORDER BY revenue DESC LIMIT 1;', [
             checkSql('Should sort revenue descending', /order\s+by\s+revenue\s+desc/i), checkSqlRows('Should return one top record', (rows) => rows.length === 1 && Number(rows[0].revenue) > 0)
           ]),
-          makeProject('a10', 'Certification Project: Executive revenue insight', 'sql', 'Build a query that returns the total revenue as one named value.', '', [], null, [
-            checkSql('Should aggregate revenue', /sum\s*\(\s*revenue\s*\)/i), checkSqlRows('Should return the dataset total', (rows, data) => rows.length === 1 && Object.values(rows[0]).some((value) => Number(value) === total(data, 'revenue')))
-          ])
+          makeProject('a10', 'HOSPITAL INSTITUTE: Patient flow and bed planning', 'python', '### Client brief\n**Faisalabad Hospital Institute** needs a reliable view of patient flow before the next admission cycle. Patient CSVs contain missing fields, admission records need doctor details joined, and operations needs a 30-day bed occupancy forecast.\n\n### Tasks\n1. Clean incomplete patient records.\n2. Join patient, admission, and doctor records.\n3. Forecast daily bed occupancy for the next 30 days.', '', [], null, [
+            checkPythonArrayLength('clean_patients', (data) => data.filter((row) => row.patient_id && row.age != null && row.admission_id).length),
+            { text: 'Should join clean admissions to a doctor record', variable: 'joined_records', fn: ({ result }) => Array.isArray(result.variables.joined_records) && result.variables.joined_records.length > 0 && result.variables.joined_records.every((row) => row.doctor_name && row.admission_id) },
+            { text: 'Should forecast 30 numeric occupancy values', variable: 'occupancy_forecast', fn: ({ result }) => Array.isArray(result.variables.occupancy_forecast) && result.variables.occupancy_forecast.length === 30 && result.variables.occupancy_forecast.every((value) => Number.isFinite(Number(value)) && Number(value) >= 0) }
+          ], { dataset: 'hospital_patients', clientStory: 'Faisalabad Hospital Institute needs a trustworthy patient-flow report and a practical bed plan for next month.', tasks: ['Clean null patient fields into `clean_patients`.', 'Join admissions and doctor details into `joined_records`.', 'Forecast 30 days of occupancy in `occupancy_forecast`.'] })
         ]
       }
     ]
@@ -164,9 +166,11 @@ const DATA_CERTIFICATIONS = {
           makeChallenge('s9', 'Summarize engagement by student', 'sql', 'Return each student and their average score.', 'SELECT * FROM data;', ['Select the student field and aggregate score with `AVG`.'], 'SELECT student, AVG(score) AS average_score FROM data GROUP BY student;', [
             checkSql('Should use AVG and GROUP BY', /avg\s*\(/i, /group\s+by/i), checkSqlRows('Should return students with numeric scores', (rows) => rows.length > 0 && rows.every((row) => 'student' in row && Number.isFinite(Number(row.average_score))))
           ], { dataset: 'engagement' }),
-          makeProject('s10', 'Certification Project: Research-ready findings', 'powerbi', 'Create a chart spec showing student scores by student.', '', [], null, [
-            checkChart('Should chart students', (chart) => chart.category === 'student'), checkChart('Should chart score values', (chart, data) => chart.value === 'score' && data.length > 0)
-          ], { dataset: 'engagement' })
+          makeProject('s10', 'MEDICINE FORECAST: Respiratory case outlook', 'python', '### Client brief\n**Faisalabad Public Health Institute** needs a transparent forecast of COVID-19 and influenza cases to plan clinic staffing. Build and evaluate a simple linear baseline before projecting the next month.\n\n### Tasks\n1. Fit a linear trend using the training portion of the case history.\n2. Evaluate the final 30 observations with mean absolute error.\n3. Forecast the next 30 days of cases.', '', [], null, [
+            { text: 'Should evaluate 30 holdout predictions', variable: 'holdout_predictions', fn: ({ result }) => Array.isArray(result.variables.holdout_predictions) && result.variables.holdout_predictions.length === 30 && result.variables.holdout_predictions.every((value) => Number.isFinite(Number(value))) },
+            checkPythonRange('holdout_mae', 0, Infinity),
+            { text: 'Should forecast 30 non-negative case counts', variable: 'forecast_cases', fn: ({ result }) => Array.isArray(result.variables.forecast_cases) && result.variables.forecast_cases.length === 30 && result.variables.forecast_cases.every((value) => Number.isFinite(Number(value)) && Number(value) >= 0) }
+          ], { dataset: 'medicine_forecast', clientStory: 'Faisalabad Public Health Institute needs an interpretable short-term case forecast and a measured holdout error before staffing clinics.', tasks: ['Fit a least-squares line on training cases.', 'Report holdout mean absolute error as `holdout_mae`.', 'Create a 30-day `forecast_cases` series for charting.'] })
         ]
       }
     ]
@@ -224,9 +228,11 @@ const DATA_CERTIFICATIONS = {
           makeChallenge('e9', 'Deduplicate countries in SQL', 'sql', 'Return one row per country with its total event amount.', 'SELECT * FROM data;', ['Aggregate the amount and group by country.'], 'SELECT country, SUM(amount) AS total_amount FROM data GROUP BY country;', [
             checkSql('Should aggregate amount by country', /sum\s*\(\s*amount\s*\)/i, /group\s+by\s+country/i), checkSqlRows('Should return numeric totals', (rows) => rows.length > 0 && rows.every((row) => Number.isFinite(Number(row.total_amount))))
           ], { dataset: 'events' }),
-          makeProject('e10', 'Certification Project: Publish a reliable data product', 'python', 'Build `published_rows` containing only complete rows from the active dataset.', '', [], null, [
-            checkPython('Should check row completeness', /all\s*\(|not\s+none|is\s+not\s+none/i), checkPythonArrayLength('published_rows', (data) => data.filter((row) => Object.values(row).every((value) => value !== null && value !== '')).length)
-          ], { dataset: 'events' })
+          makeProject('e10', 'GAS PIPELINE ETL: Sensor leak alert pipeline', 'sql', '### Client brief\n**Faisalabad Gas Company** receives pressure and flow readings from distributed pipeline sensors. Operations needs cleaned telemetry, leak candidates identified from sudden pressure drops, and an alert-ready summary.\n\n### Tasks\n1. Exclude readings with missing pressure or invalid status.\n2. Use a SQL window function to compare each sensor reading with its previous reading.\n3. Return leak alerts with sensor, zone, pressure, and prior pressure.', '', [], null, [
+            checkSql('Should use a cleaning step and LAG window function', /with\s+cleaned\s+as/i, /lag\s*\(/i),
+            checkSqlRows('Should return the leak-alert output columns', (rows) => rows.length > 0 && ['sensor_id', 'zone', 'pressure_psi', 'previous_pressure_psi'].every((column) => column in rows[0])),
+            { text: 'Should detect a real pressure drop of at least 15 psi', fn: ({ result }) => result.rows.length > 0 && result.rows.every((row) => Number(row.previous_pressure_psi) - Number(row.pressure_psi) >= 15) }
+          ], { dataset: 'gas_pipeline_sensors', clientStory: 'Faisalabad Gas Company needs an auditable sensor ETL query that turns noisy pipeline readings into actionable leak alerts.', tasks: ['Clean unusable sensor rows with a `cleaned` CTE.', 'Use `LAG(pressure_psi)` partitioned by sensor.', 'Return rows where pressure dropped at least 15 psi.'] })
         ]
       }
     ]
@@ -250,6 +256,8 @@ function makeChallenge(id, title, tool, descriptionMD, starterCode, hints, solut
     solution,
     tests,
     dataset: options.dataset || 'sales',
+    clientStory: options.clientStory || '',
+    tasks: options.tasks || [],
     resultName: options.resultName || inferResultName(starterCode),
     isProject: false
   };
@@ -487,6 +495,168 @@ const SAMPLE_DATA = {
     { user_id: 4, email: '', country: 'PK' }
   ]
 };
+
+function makeRows(length, createRow) {
+  return Array.from({ length }, (_, index) => createRow(index));
+}
+
+function generateRealWorldDatasets() {
+  const hospitalDoctors = makeRows(24, (index) => ({
+    doctor_id: `DR-${String(index + 1).padStart(3, '0')}`,
+    doctor_name: ['Amina Khan', 'Bilal Ahmed', 'Sara Malik', 'Usman Raza'][index % 4],
+    specialty: ['Cardiology', 'General Medicine', 'Pediatrics', 'Emergency'][index % 4]
+  }));
+  const hospitalAdmissions = makeRows(240, (index) => ({
+    admission_id: `ADM-${String(index + 1).padStart(5, '0')}`,
+    patient_id: `PT-${String(index + 1).padStart(5, '0')}`,
+    doctor_id: hospitalDoctors[index % hospitalDoctors.length].doctor_id,
+    admission_day: (index % 30) + 1,
+    bed_occupied: index % 17 === 0 ? 0 : 1,
+    length_of_stay: (index % 9) + 1
+  }));
+
+  return {
+    hospital_patients: makeRows(240, (index) => ({
+      patient_id: index % 31 === 0 ? null : `PT-${String(index + 1).padStart(5, '0')}`,
+      admission_id: `ADM-${String(index + 1).padStart(5, '0')}`,
+      doctor_id: hospitalDoctors[index % hospitalDoctors.length].doctor_id,
+      age: index % 19 === 0 ? null : 4 + ((index * 7) % 88),
+      department: ['Cardiology', 'General Medicine', 'Pediatrics', 'Emergency'][index % 4],
+      diagnosis: index % 23 === 0 ? '' : ['Respiratory infection', 'Hypertension', 'Diabetes', 'Routine care'][index % 4],
+      admission_day: (index % 30) + 1,
+      bed_occupied: index % 17 === 0 ? 0 : 1
+    })),
+    hospital_admissions: hospitalAdmissions,
+    hospital_doctors: hospitalDoctors,
+    gas_pipeline_sensors: makeRows(240, (index) => ({
+      sensor_id: `SENSOR-${String(index % 12 + 1).padStart(2, '0')}`,
+      reading_id: index + 1,
+      day: Math.floor(index / 12) + 1,
+      zone: `ZONE-${index % 4 + 1}`,
+      pressure_psi: Number((72 + (index % 12) * 0.18 - (index % 47 === 0 ? 19 : 0) + (index % 5) * 0.07).toFixed(2)),
+      flow_m3h: Number((90 + (index % 17) * 1.4 - (index % 47 === 0 ? 12 : 0)).toFixed(2)),
+      raw_status: index % 37 === 0 ? '' : 'OK'
+    })),
+    school_students: makeRows(320, (index) => ({
+      student_id: `STU-${String(index + 1).padStart(5, '0')}`,
+      class_name: `Grade ${6 + index % 7}`,
+      subject: ['Math', 'English', 'Science', 'Computer Studies'][index % 4],
+      score: index % 29 === 0 ? null : 35 + ((index * 13) % 66),
+      attendance_pct: 58 + ((index * 11) % 43),
+      term: `2026-T${index % 3 + 1}`
+    })),
+    retail_sales: makeRows(240, (index) => ({
+      sale_id: `SALE-${index + 1}`,
+      sku: `SKU-${index % 36 + 1}`,
+      supplier_id: `SUP-${index % 12 + 1}`,
+      day: (index % 30) + 1,
+      units_sold: 1 + (index * 7) % 24,
+      unit_price: Number((8 + (index % 20) * 2.35).toFixed(2)),
+      unit_cost: Number((4 + (index % 15) * 1.45).toFixed(2)),
+      store: `STORE-${index % 5 + 1}`
+    })),
+    retail_inventory: makeRows(240, (index) => ({
+      sku: `SKU-${index % 36 + 1}`,
+      supplier_id: `SUP-${index % 12 + 1}`,
+      on_hand: (index * 9) % 180,
+      reorder_level: 25 + (index % 6) * 5,
+      lead_days: 2 + index % 15
+    })),
+    retail_suppliers: makeRows(240, (index) => ({
+      supplier_id: `SUP-${index % 12 + 1}`,
+      supplier_name: `Supplier ${index % 12 + 1}`,
+      region: ['Punjab', 'Sindh', 'KPK', 'Balochistan'][index % 4],
+      reliability_pct: 72 + (index * 3) % 29
+    })),
+    agriculture_yields: makeRows(240, (index) => ({
+      field_id: `FIELD-${index % 20 + 1}`,
+      season: 2018 + Math.floor(index / 20),
+      crop: ['Wheat', 'Cotton', 'Rice', 'Maize'][index % 4],
+      rainfall_mm: 120 + (index * 17) % 480,
+      yield_tonnes: Number((1.2 + (index * 19) % 75 / 10 + (index % 7) * 0.04).toFixed(2)),
+      temperature_c: 18 + (index * 5) % 22
+    })),
+    medicine_forecast: makeRows(240, (index) => ({
+      day: index + 1,
+      date: `2026-${String(Math.floor(index / 28) % 12 + 1).padStart(2, '0')}-${String(index % 28 + 1).padStart(2, '0')}`,
+      cases: Math.max(12, Math.round(160 + index * 0.72 + Math.sin(index / 9) * 28 + (index % 11) * 1.7)),
+      test_positivity_pct: Number((3.5 + (index % 13) * 0.31).toFixed(2)),
+      illness: index % 2 ? 'Influenza' : 'COVID-19'
+    })),
+    energy_gas_consumption: makeRows(240, (index) => ({
+      hour: index + 1,
+      day: Math.floor(index / 24) + 1,
+      zone: `ZONE-${index % 8 + 1}`,
+      consumption_m3: Number((420 + Math.sin(index / 11) * 70 + (index % 24 < 7 ? 35 : 0) + (index % 9) * 4).toFixed(2)),
+      temperature_c: Number((14 + Math.cos(index / 20) * 10).toFixed(1))
+    })),
+    bank_loans: makeRows(300, (index) => ({
+      loan_id: `LOAN-${String(index + 1).padStart(5, '0')}`,
+      income_k: 18 + (index * 23) % 180,
+      debt_ratio: Number(((index * 7 % 95) / 100).toFixed(2)),
+      credit_score: 480 + (index * 17) % 371,
+      loan_amount_k: 5 + (index * 13) % 150,
+      defaulted: index % 9 === 0 || (index % 7 === 0 && index % 3 === 0) ? 1 : 0
+    })),
+    faisalabad_traffic: makeRows(240, (index) => ({
+      observation_id: index + 1,
+      hour: index % 24,
+      road: ['Canal Road', 'Jhang Road', 'Susan Road', 'Sargodha Road'][index % 4],
+      vehicles_per_hour: 180 + (index % 24 >= 7 && index % 24 <= 9 ? 510 : 0) + (index % 24 >= 16 && index % 24 <= 19 ? 630 : 0) + (index * 19) % 230,
+      average_speed_kmh: Math.max(8, 58 - (index % 24 >= 7 && index % 24 <= 9 ? 25 : 0) - (index % 24 >= 16 && index % 24 <= 19 ? 31 : 0) + index % 9)
+    })),
+    ecommerce_customers: makeRows(240, (index) => ({
+      customer_id: `CUS-${String(index + 1).padStart(5, '0')}`,
+      orders: index % 13,
+      days_since_order: (index * 11) % 220,
+      lifetime_value: Number((25 + (index * 31) % 1800 + (index % 7) * 12.5).toFixed(2)),
+      support_tickets: index % 6,
+      segment: ['New', 'Returning', 'Loyal', 'At Risk'][index % 4]
+    })),
+    gas_pipeline_events: makeRows(240, (index) => ({
+      event_id: `EVT-${index + 1}`,
+      sensor_id: `SENSOR-${String(index % 12 + 1).padStart(2, '0')}`,
+      event_type: index % 47 === 0 ? 'PRESSURE_DROP' : 'READING',
+      pressure_psi: Number((72 + (index % 12) * 0.18 - (index % 47 === 0 ? 19 : 0)).toFixed(2)),
+      event_day: Math.floor(index / 12) + 1,
+      payload_json: JSON.stringify({ flow: 90 + index % 20, status: index % 47 === 0 ? 'REVIEW' : 'OK' })
+    })),
+    hospital_hl7_records: makeRows(240, (index) => ({
+      message_id: `HL7-${index + 1}`,
+      patient_id: `PT-${String(index % 215 + 1).padStart(5, '0')}`,
+      event_code: ['ADT^A01', 'ADT^A03', 'ORU^R01'][index % 3],
+      facility: `FAC-${index % 4 + 1}`,
+      event_day: index % 30 + 1,
+      raw_message: `MSH|^~\\&|SunnyStudy|FAC-${index % 4 + 1}|||20261027||ADT^A01|${index + 1}|P|2.5`
+    })),
+    institute_erp_records: makeRows(300, (index) => ({
+      student_id: `STU-${String(index % 260 + 1).padStart(5, '0')}`,
+      fee_paid: index % 17 === 0 ? 0 : 1,
+      attendance_pct: 55 + (index * 7) % 46,
+      course_code: `DS-${index % 9 + 1}`,
+      sync_day: index % 30 + 1,
+      record_version: index % 3 + 1
+    })),
+    supply_chain_stock: makeRows(240, (index) => ({
+      warehouse: `WH-${index % 6 + 1}`,
+      sku: `SKU-${index % 42 + 1}`,
+      stock_units: (index * 13) % 280,
+      daily_demand: 3 + index % 24,
+      lead_days: 2 + index % 18,
+      unit_cost: Number((3.5 + index % 30 * 1.8).toFixed(2))
+    })),
+    weather_data_lake: makeRows(240, (index) => ({
+      station_id: `WX-${index % 12 + 1}`,
+      day: index + 1,
+      city: ['Faisalabad', 'Lahore', 'Multan', 'Sialkot'][index % 4],
+      temperature_c: Number((17 + Math.sin(index / 18) * 12 + index % 4).toFixed(1)),
+      rainfall_mm: Number((index % 7 === 0 ? 12 + index % 21 : index % 3 * 0.4).toFixed(1)),
+      humidity_pct: 35 + (index * 9) % 61
+    }))
+  };
+}
+
+Object.assign(SAMPLE_DATA, generateRealWorldDatasets());
 
 const state = {
   layer: 'analyst',
@@ -1120,6 +1290,12 @@ function bindChallengeEvents() {
     if (event.target === elements.projectGalleryModal) elements.projectGalleryModal.classList.add('hidden');
   });
   elements.fileInput.addEventListener('change', importDatasetFile);
+  document.getElementById('certificate-name').value = state.progress.certificateName || '';
+  document.getElementById('certificate-name').addEventListener('input', (event) => {
+    state.progress.certificateName = event.target.value;
+    saveProgress();
+  });
+  document.getElementById('download-certificate').addEventListener('click', downloadCertificatePdf);
 
   const resetData = document.getElementById('reset-data');
   if (resetData) resetData.addEventListener('click', () => {
@@ -1143,7 +1319,8 @@ function loadProgress() {
       hints: saved.hints || {},
       helpCount: Number(saved.helpCount) || 0,
       streak: Number(saved.streak) || 0,
-      lastStudyDate: saved.lastStudyDate || ''
+      lastStudyDate: saved.lastStudyDate || '',
+      certificateName: saved.certificateName || ''
     };
   } catch (error) {
     return { completed: { analyst: [], scientist: [], engineer: [] }, assisted: {}, failures: {}, drafts: {}, hints: {}, helpCount: 0, streak: 0, lastStudyDate: '' };
@@ -1213,7 +1390,10 @@ function createChallenge(lesson) {
   document.getElementById('summary-title').textContent = lesson.title;
   document.getElementById('summary-text').textContent = lesson.descriptionMD;
   elements.instructionsCaption.textContent = lesson.isProject ? 'Certification project · complete it without hints.' : `${lesson.tool.toUpperCase()} challenge · edit, run, and pass the checks.`;
-  elements.instructions.innerHTML = markdownToHtml(lesson.descriptionMD);
+  const taskList = lesson.tasks?.length
+    ? `<h3>Project tasks</h3><ol>${lesson.tasks.map((task) => `<li>${escapeHtml(task).replace(/`([^`]+)`/g, '<code>$1</code>')}</li>`).join('')}</ol>`
+    : '';
+  elements.instructions.innerHTML = `${markdownToHtml(lesson.descriptionMD)}${taskList}`;
   elements.example.textContent = lesson.example || 'No example provided.';
   elements.challengeCode.value = state.challengeDrafts[lesson.id] ?? lesson.starterCode;
   elements.hintPanel.hidden = true;
@@ -1348,9 +1528,10 @@ async function executePython(code, challenge) {
     state.pyodide = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/' });
   }
   state.pyodide.globals.set('sunnystudy_json', JSON.stringify(state.activeData));
+  state.pyodide.globals.set('sunnystudy_datasets_json', JSON.stringify(state.datasets));
   const names = [...new Set(challenge.tests.map((test) => test.variable).filter(Boolean))];
   const resetNames = names.map((name) => `globals().pop(${JSON.stringify(name)}, None)`).join('\n');
-  await state.pyodide.runPythonAsync(`import json\nrows = json.loads(sunnystudy_json)\n${resetNames}\n${code}`);
+  await state.pyodide.runPythonAsync(`import json\nrows = json.loads(sunnystudy_json)\ndatasets = json.loads(sunnystudy_datasets_json)\nadmissions = datasets.get("hospital_admissions", [])\ndoctors = datasets.get("hospital_doctors", [])\n${resetNames}\n${code}`);
   const variables = {};
   for (const name of names) {
     const proxy = state.pyodide.globals.get(name);
@@ -1457,6 +1638,61 @@ function renderCertificationProgress() {
   const percentage = all.length ? Math.round((passed.length / all.length) * 100) : 0;
   elements.certProgress.value = percentage;
   elements.certProgressLabel.textContent = `${percentage}%`;
+  renderCertificatePage();
+}
+
+function renderCertificatePage() {
+  const certificateProgress = document.getElementById('certificate-progress-bar');
+  if (!certificateProgress || !state.progress) return;
+  const certifications = Object.keys(DATA_CERTIFICATIONS);
+  const challenges = certifications.flatMap((layer) => getAllChallenges(layer));
+  const completedIds = new Set(certifications.flatMap((layer) => state.progress.completed[layer] || []));
+  const completedCount = challenges.filter((challenge) => completedIds.has(challenge.id)).length;
+  const projects = challenges.filter((challenge) => challenge.isProject);
+  const completedProjects = projects.filter((challenge) => completedIds.has(challenge.id)).length;
+  const percentage = Math.round((completedCount / challenges.length) * 100);
+
+  certificateProgress.value = percentage;
+  document.getElementById('certificate-progress-total').textContent = `${completedCount} / ${challenges.length} challenges`;
+  document.getElementById('certificate-progress-percent').textContent = `${percentage}%`;
+  document.getElementById('certificate-capstones').textContent = `${completedProjects} / ${projects.length}`;
+  document.getElementById('certificate-streak').textContent = `${state.progress.streak} ${state.progress.streak === 1 ? 'day' : 'days'}`;
+  document.getElementById('certificate-date').textContent = new Date().toLocaleDateString();
+}
+
+function downloadCertificatePdf() {
+  const message = document.getElementById('certificate-message');
+  const JsPdf = window.jspdf?.jsPDF;
+  if (!JsPdf) {
+    message.textContent = 'PDF library unavailable. Connect to the internet and refresh to retry.';
+    return;
+  }
+
+  const name = document.getElementById('certificate-name').value.trim() || 'SunnyStudy Learner';
+  const doc = new JsPdf();
+  const certifications = Object.keys(DATA_CERTIFICATIONS);
+  const completed = certifications.reduce((count, layer) => count + (state.progress.completed[layer] || []).length, 0);
+  const projects = certifications.flatMap((layer) => getAllChallenges(layer).filter((challenge) => challenge.isProject));
+  const completedProjects = projects.filter((challenge) => state.progress.completed[challenge.id] || certifications.some((layer) => (state.progress.completed[layer] || []).includes(challenge.id))).length;
+
+  doc.setFontSize(22);
+  doc.text('SunnyStudy Learning Record', 20, 28);
+  doc.setFontSize(14);
+  doc.text(`Learner: ${name}`, 20, 48);
+  doc.text(`Challenges completed: ${completed} / 120`, 20, 62);
+  doc.text(`Capstone projects completed: ${completedProjects} / ${projects.length}`, 20, 76);
+  doc.text(`Study streak: ${state.progress.streak} days`, 20, 90);
+  doc.text(`Issued locally: ${new Date().toLocaleDateString()}`, 20, 104);
+  let y = 124;
+  certifications.forEach((layer) => {
+    const all = getAllChallenges(layer);
+    const passedIds = state.progress.completed[layer] || [];
+    doc.setFontSize(12);
+    doc.text(`${DATA_CERTIFICATIONS[layer].title}: ${passedIds.length} / ${all.length}`, 20, y);
+    y += 10;
+  });
+  doc.save('sunnystudy-learning-record.pdf');
+  message.textContent = 'Progress PDF downloaded.';
 }
 
 function renderStudyStreak() {
@@ -1629,37 +1865,46 @@ function importDatasetFile(event) {
     event.target.value = '';
   };
 
-  function bindPageNavigation() {
-    document.querySelectorAll('.nav-link[data-page]').forEach((button) => {
-      button.addEventListener('click', () => navigateToPage(button.dataset.page));
-    });
-
-    window.addEventListener('hashchange', () => {
-      navigateToPage(window.location.hash === '#assignment-page' ? 'assignment' : 'learn', false);
-    });
-
-    navigateToPage(window.location?.hash === '#assignment-page' ? 'assignment' : 'learn', false);
-  }
-
-  function navigateToPage(page, updateHash = true) {
-    const assignmentVisible = page === 'assignment';
-    const learnPage = document.getElementById('learn-page');
-    const assignmentPage = document.getElementById('assignment-page');
-    if (!learnPage || !assignmentPage) return;
-
-    learnPage.hidden = assignmentVisible;
-    assignmentPage.hidden = !assignmentVisible;
-    learnPage.classList.toggle('is-visible', !assignmentVisible);
-    assignmentPage.classList.toggle('is-visible', assignmentVisible);
-    document.querySelectorAll('.nav-link[data-page]').forEach((button) => {
-      button.classList.toggle('is-active', button.dataset.page === (assignmentVisible ? 'assignment' : 'learn'));
-    });
-
-    const nextHash = assignmentVisible ? '#assignment-page' : '#learn-page';
-    if (updateHash && window.location && window.location.hash !== nextHash) window.location.hash = nextHash;
-  }
   reader.onerror = () => showToast('The selected file could not be read.');
   reader.readAsText(file);
+}
+
+function bindPageNavigation() {
+  document.querySelectorAll('.nav-link[data-page]').forEach((button) => {
+    button.addEventListener('click', () => navigateToPage(button.dataset.page));
+  });
+
+  window.addEventListener('hashchange', () => {
+    const route = window.location.hash.slice(1);
+    navigateToPage(route === 'assignment-page' ? 'assignment' : route === 'certificate-page' ? 'certificate' : 'learn', false);
+  });
+
+  const route = window.location.hash.slice(1);
+  navigateToPage(route === 'assignment-page' ? 'assignment' : route === 'certificate-page' ? 'certificate' : 'learn', false);
+}
+
+function navigateToPage(page, updateHash = true) {
+  const pageElements = {
+    learn: document.getElementById('learn-page'),
+    assignment: document.getElementById('assignment-page'),
+    certificate: document.getElementById('certificate-page')
+  };
+  const activePage = pageElements[page] ? page : 'learn';
+
+  Object.entries(pageElements).forEach(([name, pageElement]) => {
+    if (!pageElement) return;
+    const visible = name === activePage;
+    pageElement.hidden = !visible;
+    pageElement.classList.toggle('is-visible', visible);
+  });
+  document.querySelectorAll('.nav-link[data-page]').forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.page === activePage);
+  });
+
+  const hashByPage = { learn: '#learn-page', assignment: '#assignment-page', certificate: '#certificate-page' };
+  const nextHash = hashByPage[activePage];
+  if (updateHash && window.location && window.location.hash !== nextHash) window.location.hash = nextHash;
+  if (activePage === 'certificate') renderCertificatePage();
 }
 
 function saveCertificationProject(challenge) {

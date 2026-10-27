@@ -16,6 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/hyperformula.full.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/sql.js@1.11.0/dist/sql-wasm.js" defer></script>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -28,6 +29,8 @@
       <nav class="primary-nav" aria-label="Main navigation">
         <button class="nav-link is-active" type="button" data-page="learn">Learning lab</button>
         <button class="nav-link" type="button" data-page="assignment">Assignment builder</button>
+        <button class="nav-link" type="button" data-page="certificate">Certificate</button>
+        <button class="nav-link" type="button" data-page="certificate">Certificate</button>
       </nav>
       <div class="topbar-end"><span class="status-dot"></span><span>Ready to learn</span></div>
     </header>
@@ -202,6 +205,31 @@
             <div class="preview-tip"><span aria-hidden="true">↗</span><span>Your final document includes a separate cover and assignment pages.</span></div>
           </aside>
         </div>
+      </section>
+      <section id="certificate-page" class="page certificate-page" aria-labelledby="certificate-title" hidden>
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">YOUR DATA CAREER PORTFOLIO <span>·</span> 03</p>
+            <h1 id="certificate-title">Certification <span>progress.</span></h1>
+            <p class="page-intro">Your completed challenges and project work, stored on this device.</p>
+          </div>
+        </div>
+        <section class="certificate-panel" aria-label="Certification summary">
+          <div class="certificate-progress-head">
+            <div><span class="eyebrow">ALL CERTIFICATIONS</span><strong id="certificate-progress-total">0 / 120 challenges</strong></div>
+            <span id="certificate-progress-percent">0%</span>
+          </div>
+          <progress id="certificate-progress-bar" max="100" value="0">0%</progress>
+          <div class="certificate-stats">
+            <div><span>Capstone projects</span><strong id="certificate-capstones">0 / 15</strong></div>
+            <div><span>Study streak</span><strong id="certificate-streak">0 days</strong></div>
+            <div><span>Report date</span><strong id="certificate-date">—</strong></div>
+          </div>
+          <label class="certificate-name-label" for="certificate-name">Name on certificate</label>
+          <input id="certificate-name" class="certificate-name-input" type="text" autocomplete="name" placeholder="Enter your name">
+          <button id="download-certificate" class="run-button certificate-download" type="button"><span aria-hidden="true">↓</span> Download progress PDF</button>
+          <p id="certificate-message" class="certificate-message" role="status" aria-live="polite"></p>
+        </section>
       </section>
     </main>
     <footer class="site-footer"><span>SunnyStudy</span><span>Free for Students Forever</span><span>Everything stays on this device.</span></footer>

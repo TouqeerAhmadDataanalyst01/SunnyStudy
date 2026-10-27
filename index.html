@@ -10,6 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/hyperformula.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.11.0/sql-wasm.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -43,14 +49,27 @@
         <div class="learning-layout">
           <aside class="syllabus" aria-label="Course syllabus">
             <div class="syllabus-heading"><span>YOUR SYLLABUS</span><span class="syllabus-count" id="lesson-count">0</span></div>
+            <div class="layer-switcher" role="group" aria-label="Choose a learning layer">
+              <button type="button" class="layer-button is-active" data-layer="analyst">L1 Analyst</button>
+              <button type="button" class="layer-button" data-layer="scientist">L2 Scientist</button>
+              <button type="button" class="layer-button" data-layer="engineer">L3 Engineer</button>
+            </div>
             <div class="tool-switcher" role="group" aria-label="Choose a learning tool">
               <button type="button" class="tool-button is-active" data-tool="sql">SQL</button>
               <button type="button" class="tool-button" data-tool="excel">Excel</button>
               <button type="button" class="tool-button" data-tool="python">Python</button>
               <button type="button" class="tool-button" data-tool="powerbi">Power BI</button>
             </div>
+            <div class="dataset-manager">
+              <p class="eyebrow">DATASETS</p>
+              <div id="dataset-list" class="dataset-list"></div>
+            </div>
             <div id="lesson-list" class="lesson-list"></div>
             <div class="syllabus-note"><span class="note-spark" aria-hidden="true">✳</span><p>Small steps, real data.<br><strong>That’s how it sticks.</strong></p></div>
+            <div id="ethical-ad" class="ethical-ad" hidden>
+              <span>Free forever</span>
+              <p>Need dashboards for your business? <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">Hire Me</a></p>
+            </div>
           </aside>
 
           <div class="lab-area">
@@ -60,6 +79,8 @@
                 <div class="dataset-meta"><span class="dataset-indicator"></span><span id="dataset-name">sample_sales.csv</span><span class="meta-divider"></span><span id="dataset-size">8 rows</span></div>
                 <button id="save-project" class="mini-button" type="button">Save project</button>
                 <button id="export-csv" class="mini-button secondary" type="button">Export CSV</button>
+                <button id="project-gallery" class="mini-button secondary" type="button">Project gallery</button>
+                <span class="impact-pill">Students helped <strong id="student-helped-count">0</strong></span>
               </div>
             </div>
             <div class="workspace-grid">
@@ -115,7 +136,15 @@
                   <span class="result-live"><span></span> LIVE</span>
                 </div>
                 <p class="panel-caption" id="result-caption">Your output will show up here.</p>
-                <div id="result-content" class="result-content" aria-live="polite"></div>
+                <div id="result-content" class="result-content" aria-live="polite">
+                  <div class="result-header">
+                    <h3 id="summary-title">Lesson summary</h3>
+                    <p id="summary-text">Your next data decision starts here.</p>
+                  </div>
+                  <div id="output-table" class="result-table"></div>
+                  <canvas id="chart-canvas" width="320" height="180"></canvas>
+                  <pre id="console-output" class="console-output">&gt; Ready to build your next insight.</pre>
+                </div>
                 <div id="result-footer" class="result-footer"><span>OUTPUT</span><span id="result-count">Awaiting command</span></div>
               </section>
             </div>
@@ -187,5 +216,18 @@
     <footer class="site-footer"><span>SunnyStudy</span><span>Made for curious minds.</span><span>Everything stays on this device.</span></footer>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="project-gallery-modal" class="project-modal hidden" aria-modal="true" role="dialog" aria-labelledby="gallery-title">
+    <div class="project-modal-card">
+      <div class="project-modal-header">
+        <div>
+          <p class="eyebrow">PROJECT GALLERY</p>
+          <h2 id="gallery-title">Saved student projects</h2>
+        </div>
+        <button id="close-gallery" type="button" class="icon-button">×</button>
+      </div>
+      <div id="project-gallery-list" class="project-gallery-list"></div>
+    </div>
+  </div>
 </body>
 </html>

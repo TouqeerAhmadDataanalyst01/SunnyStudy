@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4ef">
+  <meta name="description" content="A practical data learning lab and mobile-friendly assignment builder.">
+  <title>SunnyStudy | Learn by doing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="SunnyStudy home">
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span>sunny<span class="brand-study">study</span></span>
+      </a>
+      <nav class="primary-nav" aria-label="Main navigation">
+        <button class="nav-link is-active" type="button" data-page="learn">Learning lab</button>
+        <button class="nav-link" type="button" data-page="assignment">Assignment builder</button>
+      </nav>
+      <div class="topbar-end"><span class="status-dot"></span><span>Ready to learn</span></div>
+    </header>
+
+    <main>
+      <section id="learn-page" class="page is-visible" aria-labelledby="learn-title">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">YOUR DATA WORKSHOP <span>·</span> 01</p>
+            <h1 id="learn-title">Learn by <span>doing.</span></h1>
+            <p class="page-intro">Bring a dataset. Try a tool. See what changes.</p>
+          </div>
+          <label class="upload-button" for="dataset-upload">
+            <span class="upload-icon" aria-hidden="true">↑</span> Import data
+            <input id="dataset-upload" type="file" accept=".csv,.json,text/csv,application/json" hidden>
+          </label>
+        </div>
+
+        <div class="learning-layout">
+          <aside class="syllabus" aria-label="Course syllabus">
+            <div class="syllabus-heading"><span>YOUR SYLLABUS</span><span class="syllabus-count" id="lesson-count">0</span></div>
+            <div class="tool-switcher" role="group" aria-label="Choose a learning tool">
+              <button type="button" class="tool-button is-active" data-tool="sql">SQL</button>
+              <button type="button" class="tool-button" data-tool="excel">Excel</button>
+              <button type="button" class="tool-button" data-tool="python">Python</button>
+              <button type="button" class="tool-button" data-tool="powerbi">Power BI</button>
+            </div>
+            <div id="lesson-list" class="lesson-list"></div>
+            <div class="syllabus-note"><span class="note-spark" aria-hidden="true">✳</span><p>Small steps, real data.<br><strong>That’s how it sticks.</strong></p></div>
+          </aside>
+
+          <div class="lab-area">
+            <div class="lab-toolbar">
+              <div class="active-course"><span id="tool-kicker">SQL FOUNDATIONS</span><strong id="active-lesson-title">Start with a query</strong></div>
+              <div class="toolbar-actions">
+                <div class="dataset-meta"><span class="dataset-indicator"></span><span id="dataset-name">sample_sales.csv</span><span class="meta-divider"></span><span id="dataset-size">8 rows</span></div>
+                <button id="save-project" class="mini-button" type="button">Save project</button>
+                <button id="export-csv" class="mini-button secondary" type="button">Export CSV</button>
+              </div>
+            </div>
+            <div class="workspace-grid">
+              <section class="work-panel source-panel" aria-labelledby="source-title">
+                <div class="panel-heading">
+                  <div><span class="panel-index">01</span><h2 id="source-title">Original file</h2></div>
+                  <button class="icon-button" id="reset-data" type="button" title="Restore sample data" aria-label="Restore sample data">↺</button>
+                </div>
+                <p class="panel-caption">Your active dataset, just as it arrived.</p>
+                <div class="table-scroll" id="source-table-wrap"><table class="data-table" id="source-table"></table></div>
+                <div class="source-footer"><span class="file-type" id="file-type">CSV</span><span id="column-count">0 columns</span></div>
+              </section>
+
+              <section class="work-panel console-panel" aria-labelledby="console-title">
+                <div class="panel-heading">
+                  <div><span class="panel-index">02</span><h2 id="console-title">Command console</h2></div>
+                  <span class="console-language" id="console-language">SQL</span>
+                </div>
+                <p class="panel-caption" id="console-caption">Write a query against your active data.</p>
+                <div id="sql-editor" class="editor-wrap">
+                  <div class="editor-label"><span class="editor-dot"></span>QUERY.SQl</div>
+                  <textarea id="sql-command" class="code-editor" spellcheck="false" aria-label="SQL query"></textarea>
+                </div>
+                <div id="excel-editor" class="editor-wrap is-hidden">
+                  <label class="editor-label" for="formula-input"><span class="editor-dot excel-dot"></span>FORMULA BAR <span class="formula-cell" id="selected-cell">A2</span></label>
+                  <div class="formula-row"><span class="formula-fx">fx</span><input id="formula-input" class="formula-input" aria-label="Excel formula" value="=SUM(E2:E9)"></div>
+                  <p class="helper-text">Select a cell in the grid, then try =SUM(E2:E9), =AVERAGE(E2:E9), =VLOOKUP(A2,A1:F9,3,FALSE), or =IF(E2&gt;500,"High","Standard").</p>
+                </div>
+                <div id="python-editor" class="editor-wrap is-hidden">
+                  <div class="editor-label"><span class="editor-dot python-dot"></span>NOTEBOOK CELL <span class="cell-count">In [1]</span></div>
+                  <textarea id="python-command" class="code-editor" spellcheck="false" aria-label="Python pandas command"></textarea>
+                </div>
+                <div id="powerbi-editor" class="editor-wrap is-hidden">
+                  <div class="editor-label"><span class="editor-dot bi-dot"></span>VISUAL BUILDER</div>
+                  <label class="field-label" for="chart-column">Measure</label>
+                  <select id="chart-column" class="select-input"></select>
+                  <label class="field-label" for="category-column">Group by</label>
+                  <select id="category-column" class="select-input"></select>
+                  <div class="chart-types" role="group" aria-label="Chart style">
+                    <button class="chart-type is-active" type="button" data-chart="bar">Bar</button>
+                    <button class="chart-type" type="button" data-chart="donut">Donut</button>
+                    <button class="chart-type" type="button" data-chart="table">Table</button>
+                  </div>
+                  <p class="helper-text">Choose a numeric measure and category to build an instant summary.</p>
+                </div>
+                <div class="console-actions"><button id="run-command" type="button" class="run-button"><span aria-hidden="true">▶</span> Run command <kbd>Ctrl ↵</kbd></button><span id="run-status" class="run-status" aria-live="polite">Ready</span></div>
+                <div class="quick-examples"><span>TRY</span><button type="button" data-example="basic">Basic</button><button type="button" data-example="filter">Filter</button><button type="button" data-example="group">Group</button></div>
+              </section>
+
+              <section class="work-panel result-panel" aria-labelledby="result-title">
+                <div class="panel-heading">
+                  <div><span class="panel-index">03</span><h2 id="result-title">Visual result</h2></div>
+                  <span class="result-live"><span></span> LIVE</span>
+                </div>
+                <p class="panel-caption" id="result-caption">Your output will show up here.</p>
+                <div id="result-content" class="result-content" aria-live="polite"></div>
+                <div id="result-footer" class="result-footer"><span>OUTPUT</span><span id="result-count">Awaiting command</span></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="assignment-page" class="page assignment-page" aria-labelledby="assignment-title" hidden>
+        <div class="page-heading assignment-heading">
+          <div><p class="eyebrow">MADE FOR THE WAY YOU STUDY <span>·</span> 02</p><h1 id="assignment-title">Your work, <span>beautifully presented.</span></h1><p class="page-intro">Build a polished assignment from your phone or any device.</p></div>
+          <button type="button" class="print-button" id="print-assignment"><span aria-hidden="true">↗</span> Export / Print</button>
+        </div>
+        <div class="assignment-layout">
+          <section class="assignment-form" aria-label="Assignment details and editor">
+            <div class="stepper" aria-label="Assignment steps">
+              <button type="button" class="step-button is-active" data-step="1"><span>1</span><b>Details</b></button><i></i>
+              <button type="button" class="step-button" data-step="2"><span>2</span><b>Cover</b></button><i></i>
+              <button type="button" class="step-button" data-step="3"><span>3</span><b>Write</b></button>
+            </div>
+            <form id="assignment-form" autocomplete="on">
+              <div class="form-step is-active" data-form-step="1">
+                <div class="form-section-title"><span>01 / ABOUT YOU</span><h2>Start with the details.</h2><p>These will appear on your cover page.</p></div>
+                <div class="form-grid">
+                  <label class="form-field"><span>Student name</span><input name="studentName" placeholder="e.g. Aanya Sharma" autocomplete="name"></label>
+                  <label class="form-field"><span>Roll number</span><input name="rollNumber" placeholder="e.g. 24CS108"></label>
+                  <label class="form-field full-field"><span>University / college</span><input name="college" placeholder="Your institution's name"></label>
+                  <label class="form-field"><span>Department</span><input name="department" placeholder="e.g. Computer Science"></label>
+                  <label class="form-field"><span>Course name</span><input name="courseName" placeholder="e.g. Data Analytics"></label>
+                  <label class="form-field"><span>Course code</span><input name="courseCode" placeholder="e.g. CS204"></label>
+                  <label class="form-field"><span>Submission date</span><input name="submissionDate" type="date"></label>
+                </div>
+                <div class="step-actions"><span>01 of 03</span><button class="next-button" type="button" data-next="2">Choose a cover <span>→</span></button></div>
+              </div>
+              <div class="form-step" data-form-step="2" hidden>
+                <div class="form-section-title"><span>02 / COVER DESIGN</span><h2>Pick your first impression.</h2><p>Your details update on the preview as you type.</p></div>
+                <div class="template-options" role="radiogroup" aria-label="Cover page template">
+                  <button type="button" class="template-option is-selected" data-template="classic" role="radio" aria-checked="true"><span class="template-thumb classic-thumb"><i></i><b></b><small></small></span><strong>Classic</strong><small>Formal, centered</small></button>
+                  <button type="button" class="template-option" data-template="modern" role="radio" aria-checked="false"><span class="template-thumb modern-thumb"><i></i><b></b><small></small></span><strong>Modern</strong><small>Structured, bold</small></button>
+                  <button type="button" class="template-option" data-template="minimal" role="radio" aria-checked="false"><span class="template-thumb minimal-thumb"><i></i><b></b><small></small></span><strong>Minimalist</strong><small>Quiet, refined</small></button>
+                </div>
+                <div class="step-actions"><button class="back-button" type="button" data-back="1">← Back</button><span>02 of 03</span><button class="next-button" type="button" data-next="3">Write assignment <span>→</span></button></div>
+              </div>
+              <div class="form-step" data-form-step="3" hidden>
+                <div class="form-section-title"><span>03 / YOUR ASSIGNMENT</span><h2>Put your thinking on the page.</h2><p>Type your questions and answers in the editor.</p></div>
+                <div class="editor-toolbar" role="toolbar" aria-label="Text formatting">
+                  <button type="button" data-insert="heading" title="Insert section heading">H</button><button type="button" data-insert="bold" title="Bold selected text"><b>B</b></button><button type="button" data-insert="list" title="Insert a numbered list">1.</button><span></span><small>PLAIN TEXT · PRINT READY</small>
+                </div>
+                <label class="sr-only" for="assignment-content">Assignment questions and answers</label>
+                <textarea id="assignment-content" class="assignment-editor" placeholder="Question 1\nWrite your answer here...\n\nQuestion 2\nContinue your assignment..." spellcheck="true"></textarea>
+                <div class="editor-foot"><span>Autosaved on this device</span><span id="word-count">0 words</span></div>
+                <div class="step-actions"><button class="back-button" type="button" data-back="2">← Back</button><span>03 of 03</span><button class="next-button" type="button" id="finish-assignment">Review & print <span>↗</span></button></div>
+              </div>
+            </form>
+          </section>
+
+          <aside class="preview-wrap" aria-label="Live assignment preview">
+            <div class="preview-heading"><span>LIVE PREVIEW</span><span class="preview-page-count">COVER · PAGE 1</span></div>
+            <article id="cover-preview" class="paper-preview template-classic">
+              <div class="paper-topline">ACADEMIC SUBMISSION</div>
+              <div class="paper-center"><span class="paper-emblem">S</span><p class="paper-college" data-preview="college">YOUR UNIVERSITY / COLLEGE</p><div class="paper-rule"></div><p class="paper-label">ASSIGNMENT</p><h2 data-preview="courseName">Course name</h2><p class="paper-course-code" data-preview="courseCode">COURSE CODE</p></div>
+              <div class="paper-details"><div><span>SUBMITTED BY</span><strong data-preview="studentName">Student name</strong><small>Roll no. <b data-preview="rollNumber">—</b></small></div><div><span>DEPARTMENT</span><strong data-preview="department">Department</strong></div><div><span>SUBMISSION DATE</span><strong data-preview="submissionDate">Date</strong></div></div>
+              <div class="paper-bottomline">SUNNYSTUDY <span>·</span> LEARNING IN YOUR OWN WAY</div>
+            </article>
+            <div class="preview-tip"><span aria-hidden="true">↗</span><span>Your final document includes a separate cover and assignment pages.</span></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>SunnyStudy</span><span>Made for curious minds.</span><span>Everything stays on this device.</span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

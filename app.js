@@ -11,45 +11,6 @@ const TOOL_LABELS = {
   powerbi: 'Power BI'
 };
 
-const LESSONS = {
-  analyst: [
-    { id: 'a1', title: 'Clean a customer table', tool: 'sql', summary: 'Filter nulls and duplicate rows before analysis.', command: 'SELECT customer_id, COUNT(*) FROM customers WHERE segment IS NOT NULL GROUP BY customer_id HAVING COUNT(*) > 1;' },
-    { id: 'a2', title: 'Revenue trend by month', tool: 'excel', summary: 'Use SUMIFS to compare revenue and growth.', command: '=SUMIFS(RevenueRange, DateRange, ">="&A2, DateRange, "<="&EOMONTH(A2,0))' },
-    { id: 'a3', title: 'Segment performance', tool: 'powerbi', summary: 'Create a KPI card for group performance.', command: 'Revenue by Segment = CALCULATE(SUM(Sales[Revenue]), ALLEXCEPT(Sales, Sales[Segment]))' },
-    { id: 'a4', title: 'Explore campaign response', tool: 'sql', summary: 'Join campaign and transaction tables to measure CTR.', command: 'SELECT campaign, ROUND(AVG(response_rate), 2) AS avg_ctr FROM marketing GROUP BY campaign;' },
-    { id: 'a5', title: 'Pivot summaries', tool: 'excel', summary: 'Compare region totals with a pivot-style table.', command: '=SUMIFS(Revenue, Region, "North")' },
-    { id: 'a6', title: 'Audit data quality', tool: 'python', summary: 'Use Python to detect missing values and bad categories.', command: 'df.isna().sum()' },
-    { id: 'a7', title: 'Retention funnel', tool: 'powerbi', summary: 'Track conversion from visit to purchase.', command: 'Conversion = DIVIDE(COUNTROWS(FilterTable), COUNTROWS(VisitorsTable))' },
-    { id: 'a8', title: 'Top customers', tool: 'sql', summary: 'Rank customers by lifetime value.', command: 'SELECT customer_id, SUM(revenue) AS LTV FROM orders GROUP BY customer_id ORDER BY LTV DESC LIMIT 10;' },
-    { id: 'a9', title: 'Subscription health', tool: 'excel', summary: 'Highlight churn risk by plan type.', command: '=COUNTIFS(PlanType, "Starter", Status, "At Risk")' },
-    { id: 'a10', title: 'Decision memo', tool: 'powerbi', summary: 'Translate numbers into a board-ready story.', command: 'Narrative = "North region grew 18% quarter-over-quarter."' }
-  ],
-  scientist: [
-    { id: 's1', title: 'Feature correlation map', tool: 'python', summary: 'Validate which variables move together.', command: 'corr = df.corr(numeric_only=True); corr.round(2)' },
-    { id: 's2', title: 'Time series forecast', tool: 'python', summary: 'Forecast monthly demand with rolling averages.', command: 'rolling = df["sales"].rolling(window=3).mean()' },
-    { id: 's3', title: 'Cohort segmentation', tool: 'sql', summary: 'Group users into behavioural cohorts.', command: 'WITH cohorts AS (SELECT user_id, ROUND(AVG(orders), 1) AS avg_orders FROM sessions GROUP BY user_id) SELECT * FROM cohorts WHERE avg_orders > 3;' },
-    { id: 's4', title: 'A/B test uplift', tool: 'excel', summary: 'Compare conversion differences across experiments.', command: '=((ExperimentBConversion-ExperimentAConversion)/ExperimentAConversion)' },
-    { id: 's5', title: 'Clustering students', tool: 'python', summary: 'Identify which learners have similar engagement.', command: 'from sklearn.cluster import KMeans\nmodel = KMeans(n_clusters=3); labels = model.fit_predict(X)' },
-    { id: 's6', title: 'Model quality review', tool: 'powerbi', summary: 'Measure recall and precision in an executive dashboard.', command: 'Precision = DIVIDE([TP], [TP] + [FP])' },
-    { id: 's7', title: 'Regression diagnostics', tool: 'excel', summary: 'Check slope, intercept, and residual trend.', command: '=LINEST(y_values, x_values, TRUE, TRUE)' },
-    { id: 's8', title: 'Feature importance', tool: 'python', summary: 'Rank the strongest drivers of an outcome.', command: 'import pandas as pd\nimportance = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False)' },
-    { id: 's9', title: 'Anomaly detection', tool: 'sql', summary: 'Flag spikes in traffic data.', command: 'SELECT date, traffic FROM logs WHERE traffic > AVG(traffic) + 2 * STDDEV(traffic);' },
-    { id: 's10', title: 'Research summary', tool: 'powerbi', summary: 'Turn model results into a scientific narrative.', command: 'Story = "The highest lift came from the strongest-engagement cohort."' }
-  ],
-  engineer: [
-    { id: 'e1', title: 'Build a warehouse table', tool: 'sql', summary: 'Create fact tables for downstream analytics.', command: 'CREATE TABLE fact_orders AS SELECT * FROM raw_orders WHERE order_date IS NOT NULL;' },
-    { id: 'e2', title: 'ETL pipeline preview', tool: 'powerbi', summary: 'Validate raw-to-clean transformations in a storage map.', command: 'Raw -> Validate -> Clean -> Aggregate -> Publish' },
-    { id: 'e3', title: 'Normalize event logs', tool: 'python', summary: 'Flatten messy JSON and standardize columns.', command: 'df = pd.json_normalize(events)' },
-    { id: 'e4', title: 'Data quality checks', tool: 'sql', summary: 'Reject invalid rows before publishing data.', command: 'SELECT COUNT(*) FROM users WHERE email IS NULL OR country NOT IN (\'PK\', \'US\', \'UK\');' },
-    { id: 'e5', title: 'UTC timestamp cleanup', tool: 'python', summary: 'Convert logs into a consistent time zone.', command: 'df["ts"] = pd.to_datetime(df["ts"], utc=True)' },
-    { id: 'e6', title: 'Warehouse query replay', tool: 'sql', summary: 'Optimize a dashboard query with filters and partitions.', command: 'SELECT region, SUM(amount) FROM fact_orders WHERE order_date >= CURRENT_DATE - 30 GROUP BY region;' },
-    { id: 'e7', title: 'Model-ready dataset', tool: 'python', summary: 'Prepare a training dataset with no gaps.', command: 'df = df.dropna().reset_index(drop=True)' },
-    { id: 'e8', title: 'Observability guardrail', tool: 'powerbi', summary: 'Track ingestion success and failed rows.', command: 'Load Success Rate = DIVIDE([SuccessfulRows], [TotalRows])' },
-    { id: 'e9', title: 'DuckDB in-browser query', tool: 'sql', summary: 'Run a lightweight analytical SQL engine in the browser.', command: 'SELECT country, sum(amount) AS revenue FROM orders GROUP BY country ORDER BY revenue DESC;' },
-    { id: 'e10', title: 'Deployment checklist', tool: 'powerbi', summary: 'Publish only after QA, access, and traceability checks.', command: 'Checklist = [QA, Access, Docs, SLA, Monitoring]' }
-  ]
-};
-
 const DATA_CERTIFICATIONS = {
   analyst: {
     title: 'Data Analyst Certification',
@@ -106,9 +67,9 @@ const DATA_CERTIFICATIONS = {
           ]),
           makeProject('a10', 'HOSPITAL INSTITUTE: Patient flow and bed planning', 'python', '### Client brief\n**Faisalabad Hospital Institute** needs a reliable view of patient flow before the next admission cycle. Patient CSVs contain missing fields, admission records need doctor details joined, and operations needs a 30-day bed occupancy forecast.\n\n### Tasks\n1. Clean incomplete patient records.\n2. Join patient, admission, and doctor records.\n3. Forecast daily bed occupancy for the next 30 days.', '', [], null, [
             checkPythonArrayLength('clean_patients', (data) => data.filter((row) => row.patient_id && row.age != null && row.admission_id).length),
-            { text: 'Should join clean admissions to a doctor record', variable: 'joined_records', fn: ({ result }) => Array.isArray(result.variables.joined_records) && result.variables.joined_records.length > 0 && result.variables.joined_records.every((row) => row.doctor_name && row.admission_id) },
+            { text: 'Should join clean patient, admission, and doctor fields', variable: 'joined_records', fn: ({ result }) => Array.isArray(result.variables.joined_records) && result.variables.joined_records.length > 0 && result.variables.joined_records.every((row) => row.patient_id && row.patient_age != null && row.admission_id && row.doctor_name) },
             { text: 'Should forecast 30 numeric occupancy values', variable: 'occupancy_forecast', fn: ({ result }) => Array.isArray(result.variables.occupancy_forecast) && result.variables.occupancy_forecast.length === 30 && result.variables.occupancy_forecast.every((value) => Number.isFinite(Number(value)) && Number(value) >= 0) }
-          ], { dataset: 'hospital_patients', clientStory: 'Faisalabad Hospital Institute needs a trustworthy patient-flow report and a practical bed plan for next month.', tasks: ['Clean null patient fields into `clean_patients`.', 'Join admissions and doctor details into `joined_records`.', 'Forecast 30 days of occupancy in `occupancy_forecast`.'] })
+          ], { dataset: 'hospital_patients', relatedDatasets: ['hospital_admissions', 'hospital_doctors'], clientStory: 'Faisalabad Hospital Institute needs a trustworthy patient-flow report and a practical bed plan for next month.', tasks: ['Clean null patient fields into `clean_patients`.', 'Join admissions and doctor details into `joined_records`.', 'Forecast 30 days of occupancy in `occupancy_forecast`.'] })
         ]
       }
     ]
@@ -169,8 +130,8 @@ const DATA_CERTIFICATIONS = {
           makeProject('s10', 'MEDICINE FORECAST: Respiratory case outlook', 'python', '### Client brief\n**Faisalabad Public Health Institute** needs a transparent forecast of COVID-19 and influenza cases to plan clinic staffing. Build and evaluate a simple linear baseline before projecting the next month.\n\n### Tasks\n1. Fit a linear trend using the training portion of the case history.\n2. Evaluate the final 30 observations with mean absolute error.\n3. Forecast the next 30 days of cases.', '', [], null, [
             { text: 'Should evaluate 30 holdout predictions', variable: 'holdout_predictions', fn: ({ result }) => Array.isArray(result.variables.holdout_predictions) && result.variables.holdout_predictions.length === 30 && result.variables.holdout_predictions.every((value) => Number.isFinite(Number(value))) },
             checkPythonRange('holdout_mae', 0, Infinity),
-            { text: 'Should forecast 30 non-negative case counts', variable: 'forecast_cases', fn: ({ result }) => Array.isArray(result.variables.forecast_cases) && result.variables.forecast_cases.length === 30 && result.variables.forecast_cases.every((value) => Number.isFinite(Number(value)) && Number(value) >= 0) }
-          ], { dataset: 'medicine_forecast', clientStory: 'Faisalabad Public Health Institute needs an interpretable short-term case forecast and a measured holdout error before staffing clinics.', tasks: ['Fit a least-squares line on training cases.', 'Report holdout mean absolute error as `holdout_mae`.', 'Create a 30-day `forecast_cases` series for charting.'] })
+            { text: 'Should chart all 30 forecast values', variable: 'forecast_chart', fn: ({ result }) => Boolean(result.chart) && result.chart.type === 'line' && result.chart.values.length === 30 }
+          ], { dataset: 'medicine_forecast', clientStory: 'Faisalabad Public Health Institute needs an interpretable short-term case forecast and a measured holdout error before staffing clinics.', tasks: ['Fit a least-squares line on training cases.', 'Report holdout mean absolute error as `holdout_mae`.', 'Create and render a 30-day forecast line chart.'] })
         ]
       }
     ]
@@ -229,8 +190,17 @@ const DATA_CERTIFICATIONS = {
             checkSql('Should aggregate amount by country', /sum\s*\(\s*amount\s*\)/i, /group\s+by\s+country/i), checkSqlRows('Should return numeric totals', (rows) => rows.length > 0 && rows.every((row) => Number.isFinite(Number(row.total_amount))))
           ], { dataset: 'events' }),
           makeProject('e10', 'GAS PIPELINE ETL: Sensor leak alert pipeline', 'sql', '### Client brief\n**Faisalabad Gas Company** receives pressure and flow readings from distributed pipeline sensors. Operations needs cleaned telemetry, leak candidates identified from sudden pressure drops, and an alert-ready summary.\n\n### Tasks\n1. Exclude readings with missing pressure or invalid status.\n2. Use a SQL window function to compare each sensor reading with its previous reading.\n3. Return leak alerts with sensor, zone, pressure, and prior pressure.', '', [], null, [
-            checkSql('Should use a cleaning step and LAG window function', /with\s+cleaned\s+as/i, /lag\s*\(/i),
-            checkSqlRows('Should return the leak-alert output columns', (rows) => rows.length > 0 && ['sensor_id', 'zone', 'pressure_psi', 'previous_pressure_psi'].every((column) => column in rows[0])),
+              checkSqlRows('Should return every detected pressure-drop row', (rows, data) => {
+                const previous = new Map();
+                let expectedAlerts = 0;
+                data.filter((row) => row.pressure_psi != null && row.raw_status).sort((left, right) => left.sensor_id.localeCompare(right.sensor_id) || left.day - right.day).forEach((row) => {
+                  const priorPressure = previous.get(row.sensor_id);
+                  if (priorPressure != null && priorPressure - row.pressure_psi >= 15) expectedAlerts += 1;
+                  previous.set(row.sensor_id, row.pressure_psi);
+                });
+                return expectedAlerts > 0 && rows.length === expectedAlerts;
+              }),
+              checkSqlRows('Should return the leak-alert output columns', (rows) => rows.length > 0 && ['sensor_id', 'zone', 'pressure_psi', 'previous_pressure_psi'].every((column) => column in rows[0])),
             { text: 'Should detect a real pressure drop of at least 15 psi', fn: ({ result }) => result.rows.length > 0 && result.rows.every((row) => Number(row.previous_pressure_psi) - Number(row.pressure_psi) >= 15) }
           ], { dataset: 'gas_pipeline_sensors', clientStory: 'Faisalabad Gas Company needs an auditable sensor ETL query that turns noisy pipeline readings into actionable leak alerts.', tasks: ['Clean unusable sensor rows with a `cleaned` CTE.', 'Use `LAG(pressure_psi)` partitioned by sensor.', 'Return rows where pressure dropped at least 15 psi.'] })
         ]
@@ -256,6 +226,7 @@ function makeChallenge(id, title, tool, descriptionMD, starterCode, hints, solut
     solution,
     tests,
     dataset: options.dataset || 'sales',
+    relatedDatasets: options.relatedDatasets || [],
     clientStory: options.clientStory || '',
     tasks: options.tasks || [],
     resultName: options.resultName || inferResultName(starterCode),
@@ -660,495 +631,35 @@ Object.assign(SAMPLE_DATA, generateRealWorldDatasets());
 
 const state = {
   layer: 'analyst',
+  currentCourse: 0,
   tool: 'sql',
-  currentLesson: null,
+  currentChallenge: null,
   resultTable: [],
   sourceTable: [],
   projects: [],
   chart: null,
-  pyodideReady: false,
-  duckdbReady: false,
-  studentHelped: Number(localStorage.getItem('sunnystudy_helped') || 0),
   datasets: {}
 };
 
 const elements = {};
 
-function init() {
-  cacheDom();
-  seedDatasetCatalog();
-  bindEvents();
-  renderLayerButtons();
-  renderToolButtons();
-  refreshLessonList();
-  restoreProjectState();
-  renderDashboard();
-  renderProjectGallery();
-  updateHelpCounter();
-  registerServiceWorker();
-  initIndexedDb();
-}
-
 function cacheDom() {
-  elements.lessonList = document.getElementById('lesson-list');
-  elements.lessonCount = document.getElementById('lesson-count');
+  elements.lessonList = document.getElementById('syllabus-list');
+  elements.lessonCount = document.getElementById('syllabus-count');
   elements.sourceTable = document.getElementById('source-table');
   elements.consoleInput = document.getElementById('challenge-code');
   elements.consoleRun = document.getElementById('run-command');
   elements.consoleOutput = document.getElementById('console-output');
-  elements.outputChart = document.getElementById('chart-canvas');
-  elements.summaryTitle = document.getElementById('summary-title') || document.getElementById('active-lesson-title');
-  elements.summaryText = document.getElementById('summary-text') || document.getElementById('console-caption');
   elements.toast = document.getElementById('toast');
   elements.projectGalleryModal = document.getElementById('project-gallery-modal');
   elements.projectGalleryList = document.getElementById('project-gallery-list');
   elements.closeGallery = document.getElementById('close-gallery');
   elements.layerButtons = [...document.querySelectorAll('.layer-button')];
-  elements.toolButtons = [...document.querySelectorAll('.tool-button')];
   elements.ethicalAd = document.getElementById('ethical-ad');
   elements.datasetList = document.getElementById('dataset-list');
   elements.saveProject = document.getElementById('save-project');
   elements.exportCsv = document.getElementById('export-csv');
   elements.projectGallery = document.getElementById('project-gallery');
-  elements.printAssignment = document.getElementById('print-assignment');
-}
-
-function bindEvents() {
-  elements.layerButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      state.layer = button.dataset.layer;
-      state.tool = getDefaultToolForLayer(state.layer);
-      renderLayerButtons();
-      renderToolButtons();
-      refreshLessonList();
-      renderDashboard();
-      showToast(`${LAYER_LABELS[state.layer]} selected`);
-    });
-  });
-
-  elements.toolButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      state.tool = button.dataset.tool;
-      renderToolButtons();
-      refreshLessonList();
-      renderDashboard();
-      showToast(`${TOOL_LABELS[state.tool]} mode selected`);
-    });
-  });
-
-  elements.consoleRun.addEventListener('click', handleConsoleRun);
-  elements.consoleInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      handleConsoleRun();
-    }
-  });
-
-  elements.saveProject.addEventListener('click', saveCurrentProject);
-  elements.exportCsv.addEventListener('click', exportCurrentCsv);
-  elements.projectGallery.addEventListener('click', () => showProjectGallery());
-  elements.closeGallery.addEventListener('click', () => elements.projectGalleryModal.classList.add('hidden'));
-  elements.projectGalleryModal.addEventListener('click', (event) => {
-    if (event.target === elements.projectGalleryModal) {
-      elements.projectGalleryModal.classList.add('hidden');
-    }
-  });
-
-  elements.printAssignment.addEventListener('click', () => window.print());
-}
-
-function renderLayerButtons() {
-  elements.layerButtons.forEach((button) => {
-    button.classList.toggle('is-active', button.dataset.layer === state.layer);
-  });
-}
-
-function renderToolButtons() {
-  const availableTools = getToolsForLayer(state.layer);
-  elements.toolButtons.forEach((button) => {
-    const isActive = button.dataset.tool === state.tool && availableTools.includes(state.tool);
-    button.classList.toggle('is-active', isActive);
-    button.disabled = !availableTools.includes(button.dataset.tool);
-    button.style.opacity = button.disabled ? '0.35' : '1';
-  });
-
-  syncEditorPanels();
-}
-
-function syncEditorPanels() {
-  elements.consoleInput = document.getElementById('challenge-code');
-  const activeLang = document.getElementById('console-language');
-  const caption = document.getElementById('console-caption');
-  if (activeLang) activeLang.textContent = TOOL_LABELS[state.tool].toUpperCase();
-  if (caption) {
-    const copy = {
-      sql: 'Write a query against your active data.',
-      excel: 'Build a formula view for your active dataset.',
-      python: 'Run a Python notebook expression against your data.',
-      powerbi: 'Build a visual metric and group your data.'
-    };
-    caption.textContent = copy[state.tool] || 'Write a query against your active data.';
-  }
-}
-
-function getDefaultToolForLayer(layer) {
-  if (layer === 'scientist') return 'python';
-  if (layer === 'engineer') return 'sql';
-  return 'sql';
-}
-
-function getToolsForLayer(layer) {
-  if (layer === 'scientist') return ['python', 'excel', 'powerbi', 'sql'];
-  if (layer === 'engineer') return ['sql', 'python', 'powerbi', 'excel'];
-  return ['sql', 'excel', 'powerbi', 'python'];
-}
-
-function refreshLessonList() {
-  const lessons = LESSONS[state.layer].filter((lesson) => lesson.tool === state.tool || state.tool === 'sql');
-  const items = lessons.length ? lessons : LESSONS[state.layer];
-  elements.lessonList.innerHTML = items
-    .map((lesson) => `
-      <button type="button" class="lesson-item ${state.currentLesson && state.currentLesson.id === lesson.id ? 'is-selected' : ''}" data-lesson-id="${lesson.id}">
-        <span class="lesson-dot"></span>
-        <span>
-          <strong>${lesson.title}</strong>
-          <small>${lesson.summary}</small>
-        </span>
-      </button>
-    `)
-    .join('');
-
-  elements.lessonCount.textContent = String(items.length);
-
-  elements.lessonList.querySelectorAll('.lesson-item').forEach((button) => {
-    button.addEventListener('click', () => {
-      const matched = getLessonById(button.dataset.lessonId);
-      if (!matched) return;
-      state.currentLesson = matched;
-      elements.consoleInput.value = matched.command;
-      renderLessonSummary(matched);
-      runLessonScenario(matched);
-      refreshLessonList();
-    });
-  });
-
-  if (!state.currentLesson) {
-    const defaultLesson = items[0];
-    if (defaultLesson) {
-      state.currentLesson = defaultLesson;
-      elements.consoleInput.value = defaultLesson.command;
-      renderLessonSummary(defaultLesson);
-      runLessonScenario(defaultLesson);
-    }
-  }
-}
-
-function getLessonById(id) {
-  return LESSONS[state.layer].find((lesson) => lesson.id === id) || null;
-}
-
-function renderLessonSummary(lesson) {
-  const layerTitle = LAYER_LABELS[state.layer];
-  if (elements.summaryTitle) elements.summaryTitle.textContent = `${layerTitle} · ${lesson.title}`;
-  if (elements.summaryText) elements.summaryText.textContent = `${lesson.summary} Use the console to practice the command with your browser-based dataset.`;
-
-  const activeLessonEl = document.getElementById('active-lesson-title');
-  if (activeLessonEl) activeLessonEl.textContent = lesson.title;
-
-  const toolKicker = document.getElementById('tool-kicker');
-  if (toolKicker) toolKicker.textContent = `${TOOL_LABELS[state.tool].toUpperCase()} · ${layerTitle.toUpperCase()}`;
-}
-
-function runLessonScenario(lesson) {
-  const tableData = buildScenarioTable(lesson);
-  state.resultTable = tableData;
-  state.sourceTable = tableData;
-  renderSourceTable();
-  renderResultTable(tableData);
-  renderChart(tableData);
-  updateHelpCounter();
-}
-
-function buildScenarioTable(lesson) {
-  const base = [...SAMPLE_DATA.sales];
-  if (lesson.tool === 'python') {
-    return SAMPLE_DATA.engagement.map((person) => ({
-      student: person.student,
-      score: person.score,
-      attendance: person.attendance,
-      labs: person.labs
-    }));
-  }
-  if (lesson.tool === 'powerbi') {
-    return base.map((entry) => ({ month: entry.month, revenue: entry.revenue, region: entry.region }));
-  }
-  if (lesson.tool === 'excel') {
-    return SAMPLE_DATA.engagement.map((person) => ({ student: person.student, attendance: person.attendance, score: person.score }));
-  }
-  return base.map((entry) => ({ month: entry.month, revenue: entry.revenue, orders: entry.orders, region: entry.region }));
-}
-
-function renderDashboard() {
-  const dataset = buildScenarioTable(state.currentLesson || { tool: state.tool });
-  state.resultTable = dataset;
-  state.sourceTable = dataset;
-  const datasetName = document.getElementById('dataset-name');
-  const datasetSize = document.getElementById('dataset-size');
-  if (datasetName) datasetName.textContent = 'sample_sales.csv';
-  if (datasetSize) datasetSize.textContent = `${dataset.length} rows`;
-  renderSourceTable();
-  renderResultTable(dataset);
-  renderChart(dataset);
-}
-
-function renderSourceTable() {
-  if (!state.sourceTable || !state.sourceTable.length) {
-    elements.sourceTable.innerHTML = '<tr><td colspan="4">No dataset available yet.</td></tr>';
-    return;
-  }
-
-  const headers = Object.keys(state.sourceTable[0]);
-  const rows = state.sourceTable.slice(0, 7).map((row) => {
-    const cells = headers.map((header) => `<td>${row[header]}</td>`).join('');
-    return `<tr>${cells}</tr>`;
-  }).join('');
-
-  elements.sourceTable.innerHTML = `
-    <thead>
-      <tr>${headers.map((header) => `<th>${header}</th>`).join('')}</tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  `;
-}
-
-function renderResultTable(rows) {
-  const output = document.getElementById('output-table');
-  const resultCount = document.getElementById('result-count');
-  if (resultCount) resultCount.textContent = rows && rows.length ? `${rows.length} rows` : 'Awaiting command';
-  if (!output) return;
-
-  if (!rows || !rows.length) {
-    output.innerHTML = '<div class="empty-state">No output available.</div>';
-    return;
-  }
-
-  const headers = Object.keys(rows[0]);
-  output.innerHTML = `
-    <table>
-      <thead><tr>${headers.map((header) => `<th>${header}</th>`).join('')}</tr></thead>
-      <tbody>${rows.slice(0, 7).map((row) => `<tr>${headers.map((header) => `<td>${row[header]}</td>`).join('')}</tr>`).join('')}</tbody>
-    </table>
-  `;
-}
-
-function renderChart(rows) {
-  const canvas = document.getElementById('chart-canvas');
-  if (!canvas) return;
-
-  const labels = rows.map((item) => item.month || item.student || item.region || item.date || 'Item');
-  const values = rows.map((item) => {
-    const keys = ['revenue', 'score', 'attendance', 'labs', 'orders', 'amount'];
-    const value = keys.find((key) => item[key] != null && !Number.isNaN(Number(item[key])));
-    return Number(value ? item[value] : 0);
-  });
-
-  if (window.Chart) {
-    if (state.chart) {
-      state.chart.destroy();
-    }
-    state.chart = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: `${LAYER_LABELS[state.layer]} • ${TOOL_LABELS[state.tool]}`,
-          data: values,
-          backgroundColor: ['#7ce0ac', '#8ec5ff', '#f9d56e', '#db8bff', '#ffb88c', '#9fe7d6', '#91a9ff', '#f7a6c8', '#e0ffd0', '#cde5ff'],
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: false } }
-      }
-    });
-  }
-}
-
-async function runPyodideTask(command) {
-  if (!window.loadPyodide) {
-    return;
-  }
-
-  if (!state.pyodideReady) {
-    state.pyodideReady = true;
-    window.pyodide = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/' });
-  }
-
-  const result = await window.pyodide.runPythonAsync(`
-import json
-print("PYODIDE_OK")
-print(json.dumps({"command": ${JSON.stringify(command)}, "rows": ${SAMPLE_DATA.engagement.length}}))
-`);
-
-  elements.consoleOutput.textContent += `\n\n[Pyodide] ${String(result).slice(0, 250)}`;
-}
-
-async function runDuckDbPipeline(command) {
-  if (!window.DuckDB) {
-    return;
-  }
-
-  if (!state.duckdbReady) {
-    const duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-browser.mjs');
-    const bundle = await duckdb.selectBundle({
-      mvp: { mainModule: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-mvp.wasm', mainWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-browser-worker.js' },
-      eh: { mainModule: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-eh.wasm', mainWorker: 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-browser-worker.js' }
-    });
-    const db = new duckdb.Database(bundle);
-    state.duckdbReady = !!db;
-    window.duckdbEngine = db;
-  }
-
-  if (!window.duckdbEngine) {
-    return;
-  }
-
-  const sql = `SELECT month, SUM(revenue) AS total_revenue FROM (VALUES ('Jan', 62000), ('Feb', 58000), ('Mar', 71000), ('Apr', 76000), ('May', 89000)) t(month, revenue) GROUP BY month;`;
-  elements.consoleOutput.textContent += `\n\n[DuckDB] Query prepared for browser-side warehouse execution.\n${sql}`;
-}
-
-function trackStudentHelp() {
-  state.studentHelped += 1;
-  localStorage.setItem('sunnystudy_helped', String(state.studentHelped));
-  updateHelpCounter();
-}
-
-function updateHelpCounter() {
-  const count = document.getElementById('student-helped-count');
-  if (count) {
-    count.textContent = String(state.studentHelped);
-  }
-  if (elements.ethicalAd) {
-    elements.ethicalAd.hidden = state.studentHelped < 6;
-  }
-}
-
-function seedDatasetCatalog() {
-  state.datasets = {
-    sales: SAMPLE_DATA.sales,
-    engagement: SAMPLE_DATA.engagement,
-    events: SAMPLE_DATA.events
-  };
-  renderDatasetList();
-}
-
-function renderDatasetList() {
-  if (!elements.datasetList) return;
-  const entries = Object.entries(state.datasets);
-  elements.datasetList.innerHTML = entries.map(([name, rows]) => `
-    <button type="button" class="mini-dataset" data-name="${name}">${name} <span>${rows.length} rows</span></button>
-  `).join('');
-
-  elements.datasetList.querySelectorAll('.mini-dataset').forEach((button) => {
-    button.addEventListener('click', () => {
-      const name = button.dataset.name;
-      if (state.datasets[name]) {
-        state.sourceTable = state.datasets[name];
-        renderSourceTable();
-        showToast(`Loaded ${name} dataset.`);
-      }
-    });
-  });
-}
-
-function saveCurrentProject() {
-  const name = prompt('Project name', `SunnyStudy ${new Date().toLocaleDateString()}`) || `SunnyStudy ${new Date().toLocaleDateString()}`;
-  const payload = {
-    id: `${Date.now()}`,
-    name,
-    layer: state.layer,
-    tool: state.tool,
-    lesson: state.currentLesson ? state.currentLesson.title : 'Quick review',
-    createdAt: new Date().toISOString(),
-    preview: buildProjectThumbnail(),
-    dataset: state.sourceTable.slice(0, 20)
-  };
-
-  state.projects = JSON.parse(localStorage.getItem('sunnystudy_projects') || '[]');
-  state.projects.unshift(payload);
-  localStorage.setItem('sunnystudy_projects', JSON.stringify(state.projects.slice(0, 12)));
-  renderProjectGallery();
-  saveProjectToIndexedDb(payload);
-  trackStudentHelp();
-  showToast(`Saved ${name}.`);
-}
-
-function buildProjectThumbnail() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 220;
-  canvas.height = 140;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#0b1220';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#7ce0ac';
-  for (let i = 0; i < 9; i += 1) {
-    ctx.fillRect(10 + i * 20, 110 - i * 9, 12, i * 9 + 10);
-  }
-  return canvas.toDataURL('image/png');
-}
-
-function renderProjectGallery() {
-  state.projects = JSON.parse(localStorage.getItem('sunnystudy_projects') || '[]');
-  if (!elements.projectGalleryList) return;
-  if (!state.projects.length) {
-    elements.projectGalleryList.innerHTML = '<div class="empty-state">No saved projects yet. Save your first concept to build a gallery.</div>';
-    return;
-  }
-
-  elements.projectGalleryList.innerHTML = state.projects.map((project) => `
-    <article class="project-card">
-      <img src="${project.preview || 'https://placehold.co/220x140/0b1220/7ce0ac?text=SunnyStudy'}" alt="${project.name}">
-      <strong>${project.name}</strong>
-      <small>${project.layer} • ${project.tool}</small>
-      <small>${new Date(project.createdAt).toLocaleDateString()}</small>
-    </article>
-  `).join('');
-}
-
-function showProjectGallery() {
-  renderProjectGallery();
-  elements.projectGalleryModal.classList.remove('hidden');
-}
-
-function restoreProjectState() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('sunnystudy_projects') || '[]');
-    state.projects = Array.isArray(stored) ? stored : [];
-  } catch (error) {
-    state.projects = [];
-  }
-}
-
-function exportCurrentCsv() {
-  if (!state.resultTable || !state.resultTable.length) {
-    showToast('No data to export yet.');
-    return;
-  }
-
-  const header = Object.keys(state.resultTable[0]).join(',');
-  const rows = state.resultTable.map((row) => Object.values(row).join(',')).join('\n');
-  const blob = new Blob([`${header}\n${rows}\n`], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `sunnystudy-${state.layer}-${Date.now()}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-  showToast('CSV exported.');
 }
 
 function showToast(message) {
@@ -1162,7 +673,7 @@ function showToast(message) {
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => undefined);
+      navigator.serviceWorker.register('./sw.js?v=7', { updateViaCache: 'none' }).catch(() => undefined);
     });
   }
 }
@@ -1199,7 +710,7 @@ globalThis.lessonsMap = lessonsMap;
 function init() {
   cacheDom();
   elements.challengeCode = document.getElementById('challenge-code');
-  elements.instructions = document.getElementById('challenge-instructions');
+  elements.instructions = document.getElementById('instructions-panel');
   elements.example = document.getElementById('challenge-example');
   elements.hintPanel = document.getElementById('hint-panel');
   elements.hintButton = document.getElementById('show-hint');
@@ -1233,7 +744,7 @@ function init() {
   bindChallengeEvents();
   renderLayerButtons();
   renderDatasetList();
-  renderChallengeCurriculum();
+  renderSyllabus();
   renderCertificationProgress();
   renderStudyStreak();
   updateHelpCounter();
@@ -1243,7 +754,11 @@ function init() {
   initIndexedDb();
 
   const firstChallenge = getAllChallenges('analyst')[0];
-  if (firstChallenge) createChallenge(firstChallenge);
+  if (firstChallenge) {
+    state.currentCourse = 0;
+    state.currentChallenge = firstChallenge;
+    renderChallenge(firstChallenge);
+  }
 }
 
 function bindChallengeEvents() {
@@ -1252,8 +767,9 @@ function bindChallengeEvents() {
   elements.layerButtons.forEach((button) => {
     button.addEventListener('click', () => {
       state.layer = button.dataset.layer;
+      state.currentCourse = 0;
       renderLayerButtons();
-      renderChallengeCurriculum();
+      renderSyllabus();
       const challenge = getAllChallenges(state.layer)[0];
       if (challenge) createChallenge(challenge);
     });
@@ -1341,21 +857,21 @@ function renderLayerButtons() {
   });
 }
 
-function renderChallengeCurriculum() {
+function renderSyllabus() {
   const certification = lessonsMap[state.layer];
   if (!certification) return;
   const challenges = getAllChallenges(state.layer);
-  elements.lessonCount.textContent = String(challenges.length);
+  updateSyllabusCount();
   elements.lessonList.innerHTML = certification.courses.map((course, courseIndex) => {
     const isCurrentCourse = course.challenges.some((challenge) => challenge.id === state.currentChallenge?.id);
     const coursePassed = course.challenges.every((challenge) => state.progress.completed[state.layer]?.includes(challenge.id));
     return `<details class="course-group" ${isCurrentCourse || (!state.currentChallenge && courseIndex === 0) ? 'open' : ''}>
       <summary><span>${escapeHtml(course.title)}</span><small>${coursePassed ? 'Complete' : `${course.challenges.filter((challenge) => state.progress.completed[state.layer]?.includes(challenge.id)).length}/${course.challenges.length}`}</small></summary>
-      <div class="course-challenges">${course.challenges.map((challenge) => {
+      <div class="course-challenges">${course.challenges.map((challenge, challengeIndex) => {
         const passed = state.progress.completed[state.layer]?.includes(challenge.id);
         const assisted = state.progress.assisted[challenge.id];
         const active = state.currentChallenge?.id === challenge.id;
-        return `<button type="button" class="challenge-link ${active ? 'is-selected' : ''} ${passed ? 'is-passed' : ''}" data-challenge-id="${challenge.id}">
+        return `<button type="button" class="challenge-item challenge-link ${active ? 'is-selected' : ''} ${passed ? 'is-passed' : ''}" data-challenge-id="${challenge.id}" data-course-index="${courseIndex}" data-challenge-index="${challengeIndex}">
           <span class="challenge-status">${passed ? '&#10003;' : assisted ? '~' : '&#9675;'}</span>
           <span>${escapeHtml(challenge.title)}</span>
         </button>`;
@@ -1365,16 +881,29 @@ function renderChallengeCurriculum() {
 
   elements.lessonList.querySelectorAll('.challenge-link').forEach((button) => {
     button.addEventListener('click', () => {
-      const challenge = challenges.find((entry) => entry.id === button.dataset.challengeId);
-      if (challenge) createChallenge(challenge);
+      selectChallenge(state.layer, Number(button.dataset.courseIndex), Number(button.dataset.challengeIndex));
     });
   });
   renderCertificationProgress();
 }
 
+function selectChallenge(layer, courseIndex, challengeIndex) {
+  const course = lessonsMap[layer]?.courses[courseIndex];
+  const challenge = course?.challenges[challengeIndex];
+  if (!challenge) return;
+  state.layer = layer;
+  state.currentCourse = courseIndex;
+  renderLayerButtons();
+  createChallenge(challenge);
+}
+
+function updateSyllabusCount() {
+  const total = Object.keys(DATA_CERTIFICATIONS).reduce((sum, layer) => sum + getAllChallenges(layer).length, 0);
+  if (elements.lessonCount) elements.lessonCount.textContent = String(total);
+}
+
 function createChallenge(lesson) {
   state.currentChallenge = lesson;
-  state.currentLesson = lesson;
   state.tool = lesson.tool;
   if (!state.importedData) {
     state.activeDatasetName = lesson.dataset;
@@ -1406,10 +935,14 @@ function createChallenge(lesson) {
   const failures = state.progress.failures[lesson.id] || 0;
   elements.hintButton.hidden = lesson.isProject || lesson.hints.length === 0 || failures < 2;
   elements.solutionButton.hidden = lesson.isProject || !lesson.solution || failures < 3;
-  renderChallengeCurriculum();
+  renderSyllabus();
   renderActiveDataset();
   renderChart();
   updateLineNumbers();
+}
+
+function renderChallenge(challenge) {
+  createChallenge(challenge);
 }
 
 async function runTests(userCode, expectedOutput) {
@@ -1457,7 +990,7 @@ async function runTests(userCode, expectedOutput) {
     elements.testSummary.textContent = 'Execution failed';
   } finally {
     elements.consoleRun.disabled = false;
-    renderChallengeCurriculum();
+    renderSyllabus();
   }
 }
 
@@ -1528,7 +1061,12 @@ async function executePython(code, challenge) {
     state.pyodide = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/' });
   }
   state.pyodide.globals.set('sunnystudy_json', JSON.stringify(state.activeData));
-  state.pyodide.globals.set('sunnystudy_datasets_json', JSON.stringify(state.datasets));
+  const datasetNames = new Set([challenge.dataset, ...challenge.relatedDatasets]);
+  const relatedData = Object.fromEntries([...datasetNames].map((name) => [
+    name,
+    state.importedData && name === state.activeDatasetName ? state.activeData : state.datasets[name] || SAMPLE_DATA[name] || []
+  ]));
+  state.pyodide.globals.set('sunnystudy_datasets_json', JSON.stringify(relatedData));
   const names = [...new Set(challenge.tests.map((test) => test.variable).filter(Boolean))];
   const resetNames = names.map((name) => `globals().pop(${JSON.stringify(name)}, None)`).join('\n');
   await state.pyodide.runPythonAsync(`import json\nrows = json.loads(sunnystudy_json)\ndatasets = json.loads(sunnystudy_datasets_json)\nadmissions = datasets.get("hospital_admissions", [])\ndoctors = datasets.get("hospital_doctors", [])\n${resetNames}\n${code}`);
@@ -1539,7 +1077,20 @@ async function executePython(code, challenge) {
     variables[name] = proxy && typeof proxy.toJs === 'function' ? proxy.toJs({ dict_converter: Object.fromEntries }) : proxy;
     if (proxy && typeof proxy.destroy === 'function') proxy.destroy();
   }
-  return { rows: [], variables, value: variables[challenge.resultName] };
+  let chart = null;
+  const chartSpec = variables.forecast_chart;
+  if (chartSpec && Array.isArray(chartSpec.labels) && Array.isArray(chartSpec.values)) {
+    chart = {
+      type: chartSpec.type,
+      category: chartSpec.category,
+      value: chartSpec.value,
+      labels: chartSpec.labels,
+      values: chartSpec.values,
+      points: chartSpec.labels.map((label, index) => ({ [chartSpec.category]: label, [chartSpec.value]: chartSpec.values[index] }))
+    };
+    renderChartSpec(chart);
+  }
+  return { rows: chart?.points || [], variables, value: variables[challenge.resultName], chart };
 }
 
 function executeChartSpec(code) {
@@ -1822,6 +1373,7 @@ function formatResult(result) {
 }
 
 function markdownToHtml(markdown) {
+  if (window.marked && typeof window.marked.parse === 'function') return window.marked.parse(markdown);
   return markdown.split('\n').map((line) => {
     const safe = escapeHtml(line);
     if (safe.startsWith('### ')) return `<h4>${safe.slice(4)}</h4>`;
@@ -1857,7 +1409,7 @@ function importDatasetFile(event) {
       state.activeDatasetName = file.name;
       state.importedData = true;
       renderActiveDataset();
-      renderChallengeCurriculum();
+      renderSyllabus();
       showToast(`Imported ${rows.length} rows from ${file.name}.`);
     } catch (error) {
       showToast(`Import failed: ${error.message}`);

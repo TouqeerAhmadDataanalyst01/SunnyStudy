@@ -12,7 +12,10 @@ For the longer introduction to the product and its architecture, read [The Sunny
 - Five courses and eight challenges per certification course; every course ends with a no-hint project challenge.
 - SQL, Excel formulas, Python, and chart-building challenges executed with sql.js, HyperFormula, Pyodide, and Chart.js.
 - Built-in datasets plus CSV and JSON import for local practice.
+- Fifteen generated domain datasets with at least 200 rows each, plus hospital and retail supporting tables.
 - Pass/fail test lists, certification progress, study streak, hints after failed runs, and gated solutions.
+- A Certificate page with aggregate progress, streak, learner name, and a local PDF progress report.
+- Three multi-step client capstones: hospital patient flow, respiratory case forecasting, and gas-pipeline ETL.
 - Local project saving and a Certification Gallery, retaining the existing IndexedDB and localStorage approach.
 - A web app manifest and service worker for installability and best-effort caching.
 
@@ -61,13 +64,15 @@ Each certification currently contains 40 challenges across five courses, includi
 - `manifest.json` describes the installable web app.
 - `sw.js` caches the local app shell and best-effort caches successful runtime requests.
 
-The engine libraries are loaded from jsDelivr. Progress, streak, drafts, hints, and help count use the `sunnystudy_progress` localStorage record. Project entries remain in localStorage and are also written to IndexedDB. Data stays in the current browser profile unless the user exports it.
+The engine libraries are loaded from jsDelivr. Progress, streak, drafts, hints, help count, and certificate name use the `sunnystudy_progress` localStorage record. Project entries remain in localStorage and are also written to IndexedDB. Data stays in the current browser profile unless the user exports it.
 
 ## Current Capabilities and Limits
 
 SunnyStudy remains an evolving prototype. The current certification engine executes the listed challenges, but this is not a general-purpose data platform:
 
 - Several practice exercises are generated from each course's active tool and dataset; expand these templates with more authored instructions and varied test cases as the curriculum grows.
+- Three capstones have been upgraded as multi-task client briefs. The remaining twelve capstones are still blank projects.
+- The certificate PDF is a locally generated learning progress report, not a third-party verified credential.
 - Runtime libraries load from jsDelivr. The first visit needs internet access; the service worker caches successful requests on a best-effort basis, but large WASM runtimes and their dependent assets are not guaranteed to be available offline.
 - SQL challenges run against a temporary table created from the current dataset. They do not connect to external databases.
 - Python challenges execute in the browser sandbox. Pyodide packages beyond its base runtime are not automatically installed.
@@ -93,10 +98,11 @@ No build output is needed. Keep `index.html`, `styles.css`, `app.js`, `manifest.
 ## Roadmap
 
 1. Add richer written instruction, guided examples, and varied test cases to the generated practice challenges.
-2. Add runtime startup states, package availability checks, and offline-friendly library loading.
-3. Add more CSV schema validation and dataset persistence controls.
-4. Finish the assignment-builder navigation, editing, autosave, and print workflow.
-5. Add a Full Stack Python certification using the same generic course/challenge schema.
+2. Upgrade the remaining 12 capstones to multi-step client projects.
+3. Add runtime startup states, package availability checks, and offline-friendly library loading.
+4. Add more CSV schema validation and dataset persistence controls.
+5. Finish the assignment-builder navigation, editing, autosave, and print workflow.
+6. Add a Full Stack Python certification using the same generic course/challenge schema.
 
 ## Project Book
 

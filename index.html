@@ -10,6 +10,26 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .cover-option.active { border-width: 3px !important; transform: scale(1.02); }
+    .assignment-pro-shell { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 16px; padding: 10px 0; }
+    .assignment-controls { max-height: 90vh; overflow-y: auto; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: #0f172a; }
+    .assignment-controls input, .assignment-controls select, .assignment-controls textarea { box-sizing: border-box; width: 100%; margin-top: 6px; padding: 8px; }
+    .assignment-control-group { margin-top: 16px; padding: 10px; border: 1px solid #334155; border-radius: 8px; }
+    .assignment-fields { display: grid; gap: 7px; margin-top: 16px; }
+    .cover-design-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+    .cover-option { padding: 12px; border: 1px solid #334155; border-radius: 6px; color: var(--ink); text-align: center; cursor: pointer; }
+    .assignment-actions { display: grid; gap: 8px; margin-top: 16px; }
+    .assignment-actions button { min-height: 40px; border: 0; border-radius: 6px; cursor: pointer; }
+    #assignment-preview { min-width: 0; min-height: 800px; overflow: auto; padding: 40px; border-radius: 8px; background: white; color: #111827; }
+    #preview-logo { display: none; max-width: 100px; max-height: 100px; margin: 0 auto 10px; object-fit: contain; }
+    #preview-questions { margin-top: 24px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #preview-questions .question-block { margin: 18px 0; page-break-inside: avoid; }
+    #preview-questions h3 { font-size: 15px; }
+    #pdf-size-info, #pdf-pages-info { margin-top: 4px; }
+    @media (max-width: 767px) { .assignment-pro-shell { grid-template-columns: 1fr; } #assignment-preview { min-height: 650px; padding: 22px; } .assignment-controls { max-height: none; } }
+    @media print { .assignment-controls { display: none !important; } .assignment-pro-shell { display: block; padding: 0; } #assignment-preview { min-height: auto; padding: 20mm; box-shadow: none; } }
+  </style>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
@@ -17,6 +37,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sql.js@1.11.0/dist/sql-wasm.js" defer></script>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -29,7 +50,6 @@
       <nav class="primary-nav" aria-label="Main navigation">
         <button class="nav-link is-active" type="button" data-page="learn">Learning lab</button>
         <button class="nav-link" type="button" data-page="assignment">Assignment builder</button>
-        <button class="nav-link" type="button" data-page="certificate">Certificate</button>
         <button class="nav-link" type="button" data-page="certificate">Certificate</button>
       </nav>
       <div class="topbar-end"><span class="status-dot"></span><span>Ready to learn</span></div>
@@ -51,8 +71,8 @@
 
         <div class="learning-layout">
           <aside class="syllabus" aria-label="Course syllabus">
-            <div class="syllabus-heading"><span>YOUR SYLLABUS</span><span class="syllabus-count" id="lesson-count">0</span></div>
-            <div class="layer-switcher" role="group" aria-label="Choose a learning layer">
+            <div class="syllabus-heading"><span>YOUR SYLLABUS</span><span class="syllabus-count" id="syllabus-count">0</span></div>
+            <div id="layer-buttons" class="layer-switcher" role="group" aria-label="Choose a learning layer">
               <button type="button" class="layer-button is-active" data-layer="analyst">L1 Analyst</button>
               <button type="button" class="layer-button" data-layer="scientist">L2 Scientist</button>
               <button type="button" class="layer-button" data-layer="engineer">L3 Engineer</button>
@@ -61,7 +81,7 @@
               <p class="eyebrow">PRACTICE DATA</p>
               <div id="dataset-list" class="dataset-list"></div>
             </div>
-            <div id="lesson-list" class="lesson-list"></div>
+            <div id="syllabus-list" class="lesson-list"></div>
             <div class="syllabus-note"><span class="note-spark" aria-hidden="true">✳</span><p>Small steps, real data.<br><strong>That’s how it sticks.</strong></p></div>
             <div id="ethical-ad" class="ethical-ad" hidden>
               <span>Free forever</span>
@@ -92,7 +112,7 @@
                   <span id="challenge-kind" class="challenge-kind">CHALLENGE</span>
                 </div>
                 <p class="panel-caption" id="instructions-caption">Choose a challenge to begin.</p>
-                <div id="challenge-instructions" class="challenge-instructions"></div>
+                <div id="instructions-panel" class="challenge-instructions"></div>
                 <div class="example-block"><span>EXAMPLE</span><pre id="challenge-example"></pre></div>
                 <div id="hint-panel" class="hint-panel" hidden></div>
                 <div class="dataset-preview-heading"><strong>Active dataset</strong><button class="icon-button" id="reset-data" type="button" title="Restore sample data" aria-label="Restore sample data">↺</button></div>
@@ -146,64 +166,79 @@
         </div>
       </section>
 
-      <section id="assignment-page" class="page assignment-page" aria-labelledby="assignment-title" hidden>
-        <div class="page-heading assignment-heading">
-          <div><p class="eyebrow">MADE FOR THE WAY YOU STUDY <span>·</span> 02</p><h1 id="assignment-title">Your work, <span>beautifully presented.</span></h1><p class="page-intro">Build a polished assignment from your phone or any device.</p></div>
-          <button type="button" class="print-button" id="print-assignment"><span aria-hidden="true">↗</span> Export / Print</button>
+      <section id="assignment-page" class="page assignment-page" hidden>
+        <div class="page-heading">
+          <div><p class="eyebrow">OFFLINE ASSIGNMENT BUILDER <span>·</span> AIOU READY</p><h1>Your work, <span>beautifully presented.</span></h1><p class="page-intro">Offline, free, no ads blocking typing. Made for AIOU.</p></div>
         </div>
-        <div class="assignment-layout">
-          <section class="assignment-form" aria-label="Assignment details and editor">
-            <div class="stepper" aria-label="Assignment steps">
-              <button type="button" class="step-button is-active" data-step="1"><span>1</span><b>Details</b></button><i></i>
-              <button type="button" class="step-button" data-step="2"><span>2</span><b>Cover</b></button><i></i>
-              <button type="button" class="step-button" data-step="3"><span>3</span><b>Write</b></button>
+        <div class="assignment-pro-shell">
+          <section class="assignment-controls" aria-label="Assignment setup">
+            <h2>Your work, beautifully presented.</h2>
+            <p style="font-size:12px;opacity:.7">Offline, free, no ads blocking typing. Made for AIOU.</p>
+            <div class="assignment-control-group">
+              <label for="uni-logo-select"><strong>University / Logo Library (15+)</strong></label>
+              <select id="uni-logo-select">
+                <option value="none">No Logo</option><option value="aiou" selected>AIOU - Allama Iqbal Open University</option>
+                <option value="pu">PU - Punjab University Lahore</option><option value="vu">VU - Virtual University</option>
+                <option value="gcuf">GCUF - Govt College Faisalabad</option><option value="uaf">UAF - Agriculture Faisalabad</option>
+                <option value="uet">UET Lahore</option><option value="bzu">BZU Multan</option><option value="iub">IUB Bahawalpur</option>
+                <option value="numl">NUML Islamabad</option><option value="allama">Allama Iqbal Logo (Old)</option>
+                <option value="hec">HEC Pakistan</option><option value="qau">QAU Islamabad</option><option value="uvas">UVAS Lahore</option>
+                <option value="comsats">COMSATS</option><option value="custom">Custom Upload Logo</option>
+              </select>
+              <input type="file" id="custom-logo-upload" accept="image/*" hidden>
+              <div id="logo-preview-box" class="logo-preview-box"><img id="logo-preview" alt="Selected university logo"><div id="logo-name">AIOU Logo selected</div></div>
             </div>
-            <form id="assignment-form" autocomplete="on">
-              <div class="form-step is-active" data-form-step="1">
-                <div class="form-section-title"><span>01 / ABOUT YOU</span><h2>Start with the details.</h2><p>These will appear on your cover page.</p></div>
-                <div class="form-grid">
-                  <label class="form-field"><span>Student name</span><input name="studentName" placeholder="e.g. Aanya Sharma" autocomplete="name"></label>
-                  <label class="form-field"><span>Roll number</span><input name="rollNumber" placeholder="e.g. 24CS108"></label>
-                  <label class="form-field full-field"><span>University / college</span><input name="college" placeholder="Your institution's name"></label>
-                  <label class="form-field"><span>Department</span><input name="department" placeholder="e.g. Computer Science"></label>
-                  <label class="form-field"><span>Course name</span><input name="courseName" placeholder="e.g. Data Analytics"></label>
-                  <label class="form-field"><span>Course code</span><input name="courseCode" placeholder="e.g. CS204"></label>
-                  <label class="form-field"><span>Submission date</span><input name="submissionDate" type="date"></label>
-                </div>
-                <div class="step-actions"><span>01 of 03</span><button class="next-button" type="button" data-next="2">Choose a cover <span>→</span></button></div>
+            <div class="assignment-control-group">
+              <strong>Cover Design Library (6)</strong>
+              <div id="cover-design-grid" class="cover-design-grid">
+                <button type="button" data-design="aiou-official" class="cover-option active">AIOU Official<small>Green + Logo</small></button>
+                <button type="button" data-design="classic-green" class="cover-option">Classic Green<small>Dark green border</small></button>
+                <button type="button" data-design="modern-blue" class="cover-option">Modern Blue<small>Blue header</small></button>
+                <button type="button" data-design="simple-black" class="cover-option">Simple Black<small>Minimal black</small></button>
+                <button type="button" data-design="gcuf-theme" class="cover-option">GCUF Theme<small>Maroon</small></button>
+                <button type="button" data-design="minimal" class="cover-option">Minimal Clean<small>White</small></button>
               </div>
-              <div class="form-step" data-form-step="2" hidden>
-                <div class="form-section-title"><span>02 / COVER DESIGN</span><h2>Pick your first impression.</h2><p>Your details update on the preview as you type.</p></div>
-                <div class="template-options" role="radiogroup" aria-label="Cover page template">
-                  <button type="button" class="template-option is-selected" data-template="classic" role="radio" aria-checked="true"><span class="template-thumb classic-thumb"><i></i><b></b><small></small></span><strong>Classic</strong><small>Formal, centered</small></button>
-                  <button type="button" class="template-option" data-template="modern" role="radio" aria-checked="false"><span class="template-thumb modern-thumb"><i></i><b></b><small></small></span><strong>Modern</strong><small>Structured, bold</small></button>
-                  <button type="button" class="template-option" data-template="minimal" role="radio" aria-checked="false"><span class="template-thumb minimal-thumb"><i></i><b></b><small></small></span><strong>Minimalist</strong><small>Quiet, refined</small></button>
-                </div>
-                <div class="step-actions"><button class="back-button" type="button" data-back="1">← Back</button><span>02 of 03</span><button class="next-button" type="button" data-next="3">Write assignment <span>→</span></button></div>
-              </div>
-              <div class="form-step" data-form-step="3" hidden>
-                <div class="form-section-title"><span>03 / YOUR ASSIGNMENT</span><h2>Put your thinking on the page.</h2><p>Type your questions and answers in the editor.</p></div>
-                <div class="editor-toolbar" role="toolbar" aria-label="Text formatting">
-                  <button type="button" data-insert="heading" title="Insert section heading">H</button><button type="button" data-insert="bold" title="Bold selected text"><b>B</b></button><button type="button" data-insert="list" title="Insert a numbered list">1.</button><span></span><small>PLAIN TEXT · PRINT READY</small>
-                </div>
-                <label class="sr-only" for="assignment-content">Assignment questions and answers</label>
-                <textarea id="assignment-content" class="assignment-editor" placeholder="Question 1\nWrite your answer here...\n\nQuestion 2\nContinue your assignment..." spellcheck="true"></textarea>
-                <div class="editor-foot"><span>Autosaved on this device</span><span id="word-count">0 words</span></div>
-                <div class="step-actions"><button class="back-button" type="button" data-back="2">← Back</button><span>03 of 03</span><button class="next-button" type="button" id="finish-assignment">Review & print <span>↗</span></button></div>
-              </div>
-            </form>
+            </div>
+            <div class="assignment-fields">
+              <strong>Cover Details</strong>
+              <input id="ab-student-name" placeholder="Student Name: e.g. Touqeer Ahmad" autocomplete="name">
+              <input id="ab-roll-no" placeholder="Roll No: e.g. CB123456">
+              <input id="ab-reg-no" placeholder="Reg No (optional)">
+              <input id="ab-course-code" placeholder="Course Code: 8613, 8607, 6400 etc" list="course-codes">
+              <datalist id="course-codes"><option value="8613"><option value="8607"><option value="8608"><option value="8623"><option value="6400"><option value="6401"><option value="6403"><option value="5455"><option value="1423"></datalist>
+              <input id="ab-course-title" placeholder="Course Title: e.g. Research Methods">
+              <input id="ab-semester" placeholder="Semester: Autumn 2025 / Spring 2026">
+              <input id="ab-tutor-name" placeholder="Tutor Name (optional)">
+              <input id="ab-assignment-no" placeholder="Assignment No: 1 or 2">
+              <input id="ab-submission-date" type="date" aria-label="Submission date">
+            </div>
+            <div class="assignment-fields">
+              <label for="ab-questions"><strong>Assignment Questions (paste all)</strong></label>
+              <textarea id="ab-questions" placeholder="Q1: What is data analysis? Discuss...&#10;Q2: Explain SQL WHERE clause with example..."></textarea>
+              <small>Supports Q1, Q2... auto-formats each question.</small>
+            </div>
+            <div class="assignment-actions">
+              <button id="ab-generate-pdf" type="button">Generate PDF (with Logo)</button>
+              <button id="ab-generate-docx" type="button">Export Word .docx (Editable)</button>
+              <div class="assignment-action-row"><button id="ab-compress-pdf" type="button">Compress PDF</button><button id="ab-save-draft" type="button">Save Draft</button></div>
+            </div>
+            <div class="pdf-quality-panel">
+              <label for="pdf-quality">PDF Size Control (AIOU LMS 5MB limit)</label>
+              <select id="pdf-quality"><option value="high">High Quality - best print</option><option value="medium" selected>Medium - recommended for LMS</option><option value="low">Low - fast upload</option></select>
+              <div id="pdf-size-info">Estimated: medium quality</div><div id="pdf-pages-info">Pages: 1+ depending on questions</div>
+            </div>
+            <p id="assignment-status" role="status" aria-live="polite"></p>
           </section>
-
-          <aside class="preview-wrap" aria-label="Live assignment preview">
-            <div class="preview-heading"><span>LIVE PREVIEW</span><span class="preview-page-count">COVER · PAGE 1</span></div>
-            <article id="cover-preview" class="paper-preview template-classic">
-              <div class="paper-topline">ACADEMIC SUBMISSION</div>
-              <div class="paper-center"><span class="paper-emblem">S</span><p class="paper-college" data-preview="college">YOUR UNIVERSITY / COLLEGE</p><div class="paper-rule"></div><p class="paper-label">ASSIGNMENT</p><h2 data-preview="courseName">Course name</h2><p class="paper-course-code" data-preview="courseCode">COURSE CODE</p></div>
-              <div class="paper-details"><div><span>SUBMITTED BY</span><strong data-preview="studentName">Student name</strong><small>Roll no. <b data-preview="rollNumber">—</b></small></div><div><span>DEPARTMENT</span><strong data-preview="department">Department</strong></div><div><span>SUBMISSION DATE</span><strong data-preview="submissionDate">Date</strong></div></div>
-              <div class="paper-bottomline">SUNNYSTUDY <span>·</span> LEARNING IN YOUR OWN WAY</div>
-            </article>
-            <div class="preview-tip"><span aria-hidden="true">↗</span><span>Your final document includes a separate cover and assignment pages.</span></div>
-          </aside>
+          <section id="assignment-preview" aria-label="Live assignment preview">
+            <div id="preview-logo-area"><img id="preview-logo" alt="University logo"></div>
+            <h2 id="preview-uni-name">ALLAMA IQBAL OPEN UNIVERSITY</h2>
+            <p class="preview-location">Islamabad - Pakistan</p>
+            <hr>
+            <h3 id="preview-course-title">Course Code: 8613 - Research Methods</h3>
+            <div id="preview-details">Student Name: __________<br>Roll No: __________<br>Semester: __________</div>
+            <div id="preview-questions"></div>
+            <footer>Generated by SunnyStudy - Offline Assignment Builder - Faisalabad</footer>
+          </section>
         </div>
       </section>
       <section id="certificate-page" class="page certificate-page" aria-labelledby="certificate-title" hidden>

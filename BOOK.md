@@ -27,7 +27,7 @@ SunnyStudy is a small, free data-learning workshop that runs in a web browser. I
 
 The project is intentionally static. Its core is made from ordinary web files rather than a server application. That keeps the project easy to host and inspect, and means there is no SunnyStudy account or paid service required to open the local app.
 
-SunnyStudy is also a work in progress. Its 120 challenges use browser runtimes and test callbacks, but the curriculum is still relatively small and the assignment builder is not connected to the active controller. This book distinguishes working challenge features from unfinished areas.
+SunnyStudy is also a work in progress. Its 120 challenges use browser runtimes and test callbacks, fifteen generated domain datasets support realistic practice, and three capstones now use multi-task client briefs. The other twelve capstones and the assignment builder still need more work.
 
 ## 2. The Learning Idea
 
@@ -43,7 +43,7 @@ The examples use familiar themes such as sales, student engagement, and event ac
 
 ## 3. Three Ways to Grow
 
-SunnyStudy has three certifications. Each currently contains five courses with eight challenges per course, for 40 challenges per certification. Five challenges in each certification are course-ending projects with blank starter code and no hints or solutions. Six practice challenges per course are generated from reusable templates.
+SunnyStudy has three certifications. Each currently contains five courses with eight challenges per course, for 40 challenges per certification. Five challenges in each certification are course-ending projects with blank starter code and no hints or solutions. Six practice challenges per course are generated from reusable templates. The hospital, medicine forecasting, and gas pipeline ETL projects have client briefs and three output-tested tasks.
 
 ### L1: Analyst
 
@@ -69,7 +69,7 @@ The Learning Lab is organized as a curriculum sidebar and three work areas:
 2. **Code editor:** editable textarea with line numbers, Run tests, Reset, Hint, and Solution controls.
 3. **Results:** test checklist, returned rows, chart, and runtime output.
 
-The sidebar groups challenges into collapsible courses. The built-in datasets cover sales, student engagement, events, and user records. CSV and JSON files can be imported into the in-memory active dataset. The toolbar provides local project saving, CSV export, certification progress, study streak, and a project gallery.
+The sidebar groups challenges into collapsible courses. In addition to starter datasets, fifteen generated real-world domains contain at least 200 rows each, with supporting hospital and retail tables. CSV and JSON files can be imported into the in-memory active dataset. The toolbar provides local project saving, CSV export, certification progress, study streak, and a project gallery. A separate Certificate page summarizes all 120 challenge slots, 15 capstones, and the streak, and can download a local PDF progress report.
 
 An Assignment Builder is also present in the page markup, with fields for a student, institution, course, and assignment text. It is not connected to the active page-navigation and challenge controller; its live preview, editor workflow, and print experience are therefore unfinished.
 
@@ -154,7 +154,7 @@ The files can be served by GitHub Pages or another static host. Place the app fi
 
 ### What offline means here
 
-After a successful visit, the service worker attempts to cache the local application shell and successful GET responses. Its cache uses a versioned name, currently `sunnystudy-v3`. The browser still may need a network connection for third-party fonts and runtime assets, especially on first load. Offline support is best-effort, not a guarantee that every runtime works without a network.
+After a successful visit, the service worker attempts to cache the local application shell and successful GET responses. Its cache uses a versioned name, currently `sunnystudy-v4`. The browser still may need a network connection for third-party fonts and runtime assets, especially on first load. Offline support is best-effort, not a guarantee that every runtime works without a network.
 
 ## 9. What Works Today
 
@@ -163,6 +163,9 @@ This table summarizes the current code rather than the eventual product directio
 | Area | Current status |
 | --- | --- |
 | Certification courses and challenges | 3 certifications, 5 courses × 8 challenges each |
+| Generated domain datasets | 15 primary datasets with at least 200 records each, plus supporting tables |
+| Multi-task client capstones | Hospital, respiratory medicine forecasting, and gas-pipeline ETL examples |
+| Certificate progress page | Local challenge/capstone/streak summary and jsPDF progress report |
 | SQL challenges | Executed locally by sql.js against a temporary table |
 | Spreadsheet challenges | Calculated by HyperFormula; generated ranges need care for imported datasets |
 | Python challenges | Run in Pyodide; packages beyond its base runtime are not preinstalled |
@@ -179,7 +182,7 @@ The most useful next development steps are practical and testable:
 
 1. **Deepen instruction:** author richer lessons for template-generated challenges and expand test coverage beyond code-pattern checks.
 2. **Harden imported-data support:** validate schemas and adapt formula ranges and challenge expectations to varying columns and row counts.
-3. **Build substantial capstones:** make projects multi-step and portfolio-worthy rather than single-command checks.
+3. **Complete capstones:** upgrade the remaining twelve projects into multi-step client deliverables.
 4. **Finish the assignment flow:** connect navigation, live cover fields, assignment text, autosave, and print layout.
 5. **Strengthen offline behavior:** pin compatible CDN assets, add explicit offline states, and test clean first load and repeat offline use.
 

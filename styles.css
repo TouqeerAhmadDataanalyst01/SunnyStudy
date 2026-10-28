@@ -81,6 +81,8 @@ h1, h2, p { margin-top: 0; }
 .impact-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 999px; background: rgba(124,224,172,0.08); color: var(--muted); font-family: var(--mono); font-size: 9px; }
 .impact-pill strong { color: var(--green); }
 .lesson-list { display: grid; gap: 3px; margin-top: 15px; }
+#syllabus-list { display: block !important; max-height: 400px; overflow-y: auto; }
+.challenge-item { padding: 6px 8px; cursor: pointer; }
 .lesson-item { display: grid; grid-template-columns: 25px 1fr; align-items: start; gap: 8px; width: 100%; padding: 9px 7px; border: 0; border-radius: 4px; background: transparent; text-align: left; cursor: pointer; }
 .lesson-item:hover { background: #f7f7f2; }
 .lesson-item.is-active, .lesson-item.is-selected { background: var(--green-pale); }

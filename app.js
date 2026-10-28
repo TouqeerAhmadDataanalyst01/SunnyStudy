@@ -667,7 +667,34 @@ function showToast(message) {
   elements.toast.textContent = message;
   elements.toast.classList.add('is-visible');
   clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => elements.toast.classList.remove('is-visible'), 1800);
+  showToast.timer = setTimeout(() => elements.toast.classList.remove('is-visible'), 2600);
+}
+
+// Browser storage can be disabled or full (especially in private browsing).
+// Keep storage failures from breaking lesson execution or challenge completion.
+let storageWarningShown = false;
+function readStoredJson(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw === null ? fallback : JSON.parse(raw);
+  } catch (error) {
+    console.warn(`SunnyStudy could not read local storage key "${key}".`, error);
+    return fallback;
+  }
+}
+
+function writeStoredJson(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    console.warn(`SunnyStudy could not save local storage key "${key}".`, error);
+    if (!storageWarningShown) {
+      storageWarningShown = true;
+      showToast('Browser storage is unavailable or full. Export your work to avoid losing it.');
+    }
+    return false;
+  }
 }
 
 function registerServiceWorker() {
@@ -679,25 +706,59 @@ function registerServiceWorker() {
 }
 
 function initIndexedDb() {
-  const request = indexedDB.open('SunnyStudyDb', 1);
-  request.onupgradeneeded = () => {
-    const db = request.result;
-    if (!db.objectStoreNames.contains('projects')) {
-      db.createObjectStore('projects', { keyPath: 'id' });
-    }
-  };
-  request.onsuccess = () => {
-    console.info('IndexedDB ready for student project storage.');
-  };
+  if (!('indexedDB' in window)) {
+    console.warn('SunnyStudy IndexedDB is unavailable in this browser.');
+    return;
+  }
+  try {
+    const request = window.indexedDB.open('SunnyStudyDb', 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('projects')) {
+        db.createObjectStore('projects', { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = () => {
+      request.result.close();
+      console.info('IndexedDB ready for student project storage.');
+    };
+    request.onerror = () => console.warn('SunnyStudy could not initialize IndexedDB.', request.error);
+    request.onblocked = () => console.warn('SunnyStudy IndexedDB upgrade is blocked by another open tab.');
+  } catch (error) {
+    console.warn('SunnyStudy IndexedDB is unavailable.', error);
+  }
 }
 
 function saveProjectToIndexedDb(project) {
-  const request = indexedDB.open('SunnyStudyDb', 1);
-  request.onsuccess = () => {
-    const db = request.result;
-    const tx = db.transaction('projects', 'readwrite');
-    tx.objectStore('projects').put(project);
-  };
+  if (!('indexedDB' in window)) return;
+  try {
+    const request = window.indexedDB.open('SunnyStudyDb', 1);
+    request.onerror = () => console.warn('SunnyStudy could not open IndexedDB to save a project.', request.error);
+    request.onsuccess = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('projects')) {
+        db.close();
+        console.warn('SunnyStudy IndexedDB project store is missing; retry after database initialization.');
+        return;
+      }
+      let tx;
+      try {
+        tx = db.transaction('projects', 'readwrite');
+        tx.objectStore('projects').put(project);
+        tx.oncomplete = () => db.close();
+        tx.onerror = () => {
+          console.warn('SunnyStudy could not save the project to IndexedDB.', tx.error);
+          db.close();
+        };
+        tx.onabort = () => db.close();
+      } catch (error) {
+        db.close();
+        console.warn('SunnyStudy could not start an IndexedDB save transaction.', error);
+      }
+    };
+  } catch (error) {
+    console.warn('SunnyStudy could not save the project to IndexedDB.', error);
+  }
 }
 
 const lessonsMap = {
@@ -824,27 +885,26 @@ function bindChallengeEvents() {
 }
 
 function loadProgress() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('sunnystudy_progress') || '{}');
-    return {
-      completed: saved.completed || { analyst: [], scientist: [], engineer: [] },
-      assisted: saved.assisted || {},
-      solutionUsed: saved.solutionUsed || {},
-      failures: saved.failures || {},
-      drafts: saved.drafts || {},
-      hints: saved.hints || {},
-      helpCount: Number(saved.helpCount) || 0,
-      streak: Number(saved.streak) || 0,
-      lastStudyDate: saved.lastStudyDate || '',
-      certificateName: saved.certificateName || ''
-    };
-  } catch (error) {
-    return { completed: { analyst: [], scientist: [], engineer: [] }, assisted: {}, failures: {}, drafts: {}, hints: {}, helpCount: 0, streak: 0, lastStudyDate: '' };
+  const saved = readStoredJson('sunnystudy_progress', {});
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) {
+    return { completed: { analyst: [], scientist: [], engineer: [] }, assisted: {}, solutionUsed: {}, failures: {}, drafts: {}, hints: {}, helpCount: 0, streak: 0, lastStudyDate: '', certificateName: '' };
   }
+  return {
+    completed: saved.completed && typeof saved.completed === 'object' ? saved.completed : { analyst: [], scientist: [], engineer: [] },
+    assisted: saved.assisted && typeof saved.assisted === 'object' ? saved.assisted : {},
+    solutionUsed: saved.solutionUsed && typeof saved.solutionUsed === 'object' ? saved.solutionUsed : {},
+    failures: saved.failures && typeof saved.failures === 'object' ? saved.failures : {},
+    drafts: saved.drafts && typeof saved.drafts === 'object' ? saved.drafts : {},
+    hints: saved.hints && typeof saved.hints === 'object' ? saved.hints : {},
+    helpCount: Number(saved.helpCount) || 0,
+    streak: Number(saved.streak) || 0,
+    lastStudyDate: typeof saved.lastStudyDate === 'string' ? saved.lastStudyDate : '',
+    certificateName: typeof saved.certificateName === 'string' ? saved.certificateName : ''
+  };
 }
 
 function saveProgress() {
-  localStorage.setItem('sunnystudy_progress', JSON.stringify(state.progress));
+  return writeStoredJson('sunnystudy_progress', state.progress);
 }
 
 function getAllChallenges(layer) {
@@ -1471,12 +1531,13 @@ function saveCertificationProject(challenge) {
     createdAt: new Date().toISOString(),
     dataset: state.activeData.slice(0, 30)
   };
-  const saved = JSON.parse(localStorage.getItem('sunnystudy_projects') || '[]');
-  if (!saved.some((item) => item.lesson === challenge.title && item.layer === state.layer)) saved.unshift(project);
-  localStorage.setItem('sunnystudy_projects', JSON.stringify(saved.slice(0, 30)));
+  const savedValue = readStoredJson('sunnystudy_projects', []);
+  const saved = Array.isArray(savedValue) ? savedValue : [];
+  if (!saved.some((item) => item && item.lesson === challenge.title && item.layer === state.layer)) saved.unshift(project);
+  const stored = writeStoredJson('sunnystudy_projects', saved.slice(0, 30));
   saveProjectToIndexedDb(project);
   renderProjectGallery();
-  showToast('Certification project completed and saved.');
+  showToast(stored ? 'Certification project completed and saved.' : 'Project completed, but browser storage failed. Export your work if possible.');
 }
 
 function saveCurrentProject() {
@@ -1491,16 +1552,18 @@ function saveCurrentProject() {
     createdAt: new Date().toISOString(),
     dataset: state.activeData.slice(0, 30)
   };
-  const saved = JSON.parse(localStorage.getItem('sunnystudy_projects') || '[]');
+  const savedValue = readStoredJson('sunnystudy_projects', []);
+  const saved = Array.isArray(savedValue) ? savedValue : [];
   saved.unshift(project);
-  localStorage.setItem('sunnystudy_projects', JSON.stringify(saved.slice(0, 30)));
+  const stored = writeStoredJson('sunnystudy_projects', saved.slice(0, 30));
   saveProjectToIndexedDb(project);
   renderProjectGallery();
-  showToast('Project saved on this device.');
+  showToast(stored ? 'Project saved on this device.' : 'Could not save locally. Export your work if possible.');
 }
 
 function renderProjectGallery() {
-  state.projects = JSON.parse(localStorage.getItem('sunnystudy_projects') || '[]');
+  const saved = readStoredJson('sunnystudy_projects', []);
+  state.projects = Array.isArray(saved) ? saved.filter((project) => project && typeof project === 'object') : [];
   if (!elements.projectGalleryList) return;
   elements.projectGalleryList.replaceChildren();
   if (!state.projects.length) {
@@ -1527,11 +1590,8 @@ function showProjectGallery() {
 }
 
 function restoreProjectState() {
-  try {
-    state.projects = JSON.parse(localStorage.getItem('sunnystudy_projects') || '[]');
-  } catch (error) {
-    state.projects = [];
-  }
+  const saved = readStoredJson('sunnystudy_projects', []);
+  state.projects = Array.isArray(saved) ? saved.filter((project) => project && typeof project === 'object') : [];
 }
 
 function exportCurrentCsv() {
